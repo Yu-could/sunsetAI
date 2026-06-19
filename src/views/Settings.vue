@@ -78,6 +78,16 @@ const isVerified = computed(() => !!store.userProfile?.idCard)
 const saveSettings = () => {
   store.saveAppSettings(settings.value)
   alert('设置已保存')
+  
+  const role = store.loginStatus?.role || ''
+  const routes = {
+    'parent-mobile': '/parent',
+    'parent-desktop': '/desktop',
+    'child-mobile': '/child',
+    'child-desktop': '/desktop/child'
+  }
+  const targetRoute = routes[role] || '/parent'
+  router.push(targetRoute)
 }
 
 const logout = () => {
