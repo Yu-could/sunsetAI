@@ -45,7 +45,7 @@ const isDesktop = computed(() => {
 })
 
 const isEntry = computed(() => {
-  return route.path === '/' || route.path.startsWith('/login')
+  return route.path === '/' || route.path.startsWith('/login') || route.path.startsWith('/realname')
 })
 
 const parentNavItems = [
