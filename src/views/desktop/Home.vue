@@ -205,7 +205,7 @@
             <span class="text-2xl mb-1">📞</span>
             <span class="text-xs font-medium text-gray-700">联系子女</span>
           </button>
-          <button class="flex flex-col items-center justify-center p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
+          <button @click="goToPage('/settings')" class="flex flex-col items-center justify-center p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
             <span class="text-2xl mb-1">⚙️</span>
             <span class="text-xs font-medium text-gray-700">设置</span>
           </button>
