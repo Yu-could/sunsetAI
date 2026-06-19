@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>夕阳智语 SunsetAI - AI语音助老助手</title>
+  <style>
+    /* ===== 全局重置与基础样式 ===== */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* 色彩系统 */
+      --color-parent: #d4a574;
+      --color-parent-hover: #c49564;
+      --color-parent-light: #fffbf7;
+      --color-parent-bg: #ffe8cc;
+      --color-child: #74a5d4;
+      --color-child-hover: #6495c4;
+      --color-child-light: #f7fcff;
+      --color-child-bg: #cce8ff;
+      --color-bg: #f8f6f3;
+      --color-card: #ffffff;
+      --color-text: #1a1a1a;
+      --color-text-secondary: #555555;
+      --color-text-muted: #888888;
+      --color-border: #e8e5e0;
+      --color-info-bg: #f5f3f0;
+      --color-shadow: rgba(0, 0, 0, 0.08);
+      --color-shadow-hover: rgba(0, 0, 0, 0.12);
+
+      /* 间距系统（4px基准） */
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 20px;
+      --space-6: 24px;
+      --space-8: 32px;
+      --space-10: 40px;
+      --space-12: 48px;
+
+      /* 圆角系统 */
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 20px;
+      --radius-2xl: 24px;
+
+      /* 动画 */
+      --transition-fast: 0.2s ease;
+      --transition-normal: 0.3s ease;
+      --transition-slow: 0.4s ease;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-6);
+      line-height: 1.6;
+    }
+
+    /* ===== 主容器 ===== */
+    .entry-container {
+      width: 100%;
+      max-width: 480px;
+      background: var(--color-card);
+      border-radius: var(--radius-2xl);
+      box-shadow: 0 4px 24px var(--color-shadow);
+      padding: var(--space-10) var(--space-8);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 装饰背景 */
+    .entry-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, var(--color-parent) 0%, var(--color-child) 100%);
+    }
+
+    /* ===== 品牌区域 ===== */
+    .brand-section {
+      text-align: center;
+      margin-bottom: var(--space-10);
+    }
+
+    .logo-wrapper {
+      width: 88px;
+      height: 88px;
+      background: linear-gradient(135deg, var(--color-parent) 0%, #e8b88a 100%);
+      border-radius: var(--radius-xl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto var(--space-5);
+      box-shadow: 0 4px 16px rgba(212, 165, 116, 0.3);
+      font-size: 44px;
+      line-height: 1;
+    }
+
+    .brand-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-bottom: var(--space-2);
+      letter-spacing: 2px;
+    }
+
+    .brand-subtitle {
+      font-size: 15px;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-5);
+    }
+
+    .brand-tagline {
+      font-size: 17px;
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+      padding: 0 var(--space-4);
+    }
+
+    /* ===== 步骤指示器 ===== */
+    .step-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-4);
+      margin-bottom: var(--space-8);
+    }
+
+    .step-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--color-border);
+      transition: all var(--transition-normal);
+      position: relative;
+    }
+
+    .step-dot.active {
+      background: var(--color-parent);
+      transform: scale(1.2);
+    }
+
+    .step-dot.completed {
+      background: var(--color-parent);
+    }
+
+    .step-dot::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 20px;
+      width: 40px;
+      height: 2px;
+      background: var(--color-border);
+      transform: translateY(-50%);
+      transition: background var(--transition-normal);
+    }
+
+    .step-dot:last-child::after {
+      display: none;
+    }
+
+    .step-dot.completed::after {
+      background: var(--color-parent);
+    }
+
+    .step-text {
+      text-align: center;
+      font-size: 15px;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-6);
+      font-weight: 500;
+    }
+
+    /* ===== 引导语 ===== */
+    .guide-text {
+      text-align: center;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: var(--space-8);
+      line-height: 1.5;
+    }
+
+    /* ===== 选项按钮 ===== */
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-5);
+      margin-bottom: var(--space-8);
+    }
+
+    .option-btn {
+      width: 100%;
+      border: 3px solid var(--color-border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-8) var(--space-6);
+      background: var(--color-card);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--space-3);
+      transition: all var(--transition-normal);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .option-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      opacity: 0;
+      transition: opacity var(--transition-normal);
+    }
+
+    .option-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px var(--color-shadow-hover);
+    }
+
+    .option-btn:active {
+      transform: translateY(-1px);
+    }
+
+    /* 父母按钮样式 */
+    .option-btn.parent {
+      border-color: var(--color-parent);
+    }
+
+    .option-btn.parent::before {
+      background: var(--color-parent-light);
+    }
+
+    .option-btn.parent:hover::before {
+      opacity: 1;
+    }
+
+    .option-btn.parent:hover {
+      border-color: var(--color-parent-hover);
+      box-shadow: 0 8px 24px rgba(212, 165, 116, 0.2);
+    }
+
+    /* 子女按钮样式 */
+    .option-btn.child {
+      border-color: var(--color-child);
+    }
+
+    .option-btn.child::before {
+      background: var(--color-child-light);
+    }
+
+    .option-btn.child:hover::before {
+      opacity: 1;
+    }
+
+    .option-btn.child:hover {
+      border-color: var(--color-child-hover);
+      box-shadow: 0 8px 24px rgba(116, 165, 212, 0.2);
+    }
+
+    /* 按钮内容 */
+    .option-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: var(--radius-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .option-icon svg {
+      width: 40px;
+      height: 40px;
+      color: inherit;
+    }
+
+    .option-btn.parent .option-icon {
+      background: var(--color-parent-bg);
+      color: #8b6914;
+    }
+
+    .option-btn.child .option-icon {
+      background: var(--color-child-bg);
+      color: #1a5276;
+    }
+
+    /* 设备图标默认样式 */
+    .option-btn:not(.parent):not(.child) .option-icon {
+      background: #f5f5f5;
+      color: var(--color-text-secondary);
+    }
+
+    /* 设备图标继承主题色 */
+    .option-btn.parent .option-icon svg,
+    .option-btn.child .option-icon svg {
+      color: inherit;
+    }
+
+    .option-label {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--color-text);
+      position: relative;
+      z-index: 1;
+    }
+
+    .option-desc {
+      font-size: 15px;
+      color: var(--color-text-muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ===== 返回按钮 ===== */
+    .back-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      width: 100%;
+      padding: var(--space-4);
+      background: transparent;
+      border: 2px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--color-text-secondary);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      margin-bottom: var(--space-6);
+    }
+
+    .back-btn:hover {
+      background: var(--color-info-bg);
+      border-color: var(--color-text-muted);
+      color: var(--color-text);
+    }
+
+    .back-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    /* ===== 提示信息 ===== */
+    .info-box {
+      background: var(--color-info-bg);
+      border-radius: var(--radius-lg);
+      padding: var(--space-5) var(--space-6);
+      text-align: center;
+      font-size: 14px;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+      margin-bottom: var(--space-6);
+    }
+
+    /* ===== 页脚 ===== */
+    .footer {
+      text-align: center;
+      font-size: 12px;
+      color: var(--color-text-muted);
+      padding-top: var(--space-6);
+      border-top: 1px solid var(--color-border);
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: var(--space-6);
+      margin-top: var(--space-3);
+    }
+
+    .footer-links a {
+      color: var(--color-text-muted);
+      text-decoration: none;
+      transition: color var(--transition-fast);
+    }
+
+    .footer-links a:hover {
+      color: var(--color-parent);
+    }
+
+    /* ===== 页面切换动画 ===== */
+    .step-page {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .step-page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .step-page.forward {
+      animation: slideInRight 0.4s ease;
+    }
+
+    .step-page.backward {
+      animation: slideInLeft 0.4s ease;
+    }
+
+    /* ===== 选中状态 ===== */
+    .selected-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: var(--space-5);
+    }
+
+    .selected-tag.parent-tag {
+      background: var(--color-parent-bg);
+      color: #8b6914;
+    }
+
+    .selected-tag.child-tag {
+      background: var(--color-child-bg);
+      color: #1a5276;
+    }
+
+    /* ===== 响应式适配 ===== */
+    @media (min-width: 768px) {
+      .entry-container {
+        max-width: 520px;
+        padding: var(--space-12) var(--space-10);
+      }
+
+      .brand-title {
+        font-size: 36px;
+      }
+
+      .option-btn {
+        padding: var(--space-10) var(--space-8);
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: var(--space-5);
+      }
+
+      .option-icon {
+        width: 72px;
+        height: 72px;
+        font-size: 40px;
+      }
+
+      .option-label {
+        font-size: 26px;
+      }
+
+      .guide-text {
+        font-size: 22px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      body {
+        padding: var(--space-4);
+      }
+
+      .entry-container {
+        padding: var(--space-8) var(--space-5);
+      }
+
+      .brand-title {
+        font-size: 28px;
+      }
+
+      .option-label {
+        font-size: 22px;
+      }
+
+      .option-btn {
+        padding: var(--space-6) var(--space-4);
+      }
+    }
+
+    /* ===== 高对比度模式支持 ===== */
+    @media (prefers-contrast: high) {
+      .option-btn {
+        border-width: 4px;
+      }
+
+      .option-btn.parent {
+        border-color: #8b6914;
+      }
+
+      .option-btn.child {
+        border-color: #1a5276;
+      }
+    }
+
+    /* ===== 减少动画支持 ===== */
+    @media (prefers-reduced-motion: reduce) {
+      .step-page {
+        animation: none;
+      }
+
+      .option-btn {
+        transition: none;
+      }
+    }
+
+    /* ===== 选中指示器 ===== */
+    .selection-summary {
+      text-align: center;
+      margin-bottom: var(--space-6);
+    }
+
+    .selection-summary .role-badge {
+      display: inline-block;
+      padding: var(--space-2) var(--space-5);
+      border-radius: var(--radius-md);
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: var(--space-3);
+    }
+
+    .role-badge.parent-role {
+      background: var(--color-parent-bg);
+      color: #8b6914;
+    }
+
+    .role-badge.child-role {
+      background: var(--color-child-bg);
+      color: #1a5276;
+    }
+
+    .selection-summary .device-hint {
+      font-size: 15px;
+      color: var(--color-text-muted);
+    }
+
+    /* ===== 跳转提示 ===== */
+    .redirect-notice {
+      text-align: center;
+      padding: var(--space-10) var(--space-6);
+    }
+
+    .redirect-notice .spinner {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--color-border);
+      border-top-color: var(--color-parent);
+      border-radius: 50%;
+      margin: 0 auto var(--space-6);
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .redirect-notice p {
+      font-size: 18px;
+      color: var(--color-text-secondary);
+    }
+
+    .redirect-notice .redirect-target {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--color-text);
+      margin-top: var(--space-3);
+    }
+  </style>
+</head>
+<body>
+  <div class="entry-container">
+    <!-- 装饰条 -->
+    <div style="position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--color-parent) 0%, var(--color-child) 100%);"></div>
+
+    <!-- ===== 品牌区域（公共） ===== -->
+    <div class="brand-section">
+      <div class="logo-wrapper">☀️</div>
+      <h1 class="brand-title">夕阳智语</h1>
+      <p class="brand-subtitle">SunsetAI - AI语音助老助手</p>
+    </div>
+
+    <!-- ===== 第1步：选择角色 ===== -->
+    <div id="step1" class="step-page active">
+      <!-- 步骤指示器 -->
+      <div class="step-indicator">
+        <div class="step-dot active"></div>
+        <div class="step-dot"></div>
+      </div>
+
+      <!-- 引导语 -->
+      <p class="guide-text">您是长辈还是子女？</p>
+
+      <!-- 选项列表 -->
+      <div class="options-list">
+        <button class="option-btn parent" onclick="selectRole('parent')">
+          <div class="option-icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="24" cy="14" r="8"/>
+              <path d="M12 44c0-8 5-14 12-14s12 6 12 14"/>
+              <path d="M20 32l4 6 4-6" stroke-width="2"/>
+            </svg>
+          </div>
+          <div>
+            <div class="option-label">我是父母</div>
+            <div class="option-desc">我是长辈，想使用助老服务</div>
+          </div>
+        </button>
+
+        <button class="option-btn child" onclick="selectRole('child')">
+          <div class="option-icon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="24" cy="14" r="8"/>
+              <path d="M12 44c0-8 5-14 12-14s12 6 12 14"/>
+              <circle cx="36" cy="10" r="5"/>
+              <path d="M32 26c2-4 4-6 8-6"/>
+            </svg>
+          </div>
+          <div>
+            <div class="option-label">我是子女</div>
+            <div class="option-desc">我是子女，想关心父母状况</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- 提示信息 -->
+      <div class="info-box">
+        请选择与您身份相符的选项，我们将为您推荐最适合的使用方式
+      </div>
+    </div>
+
+    <!-- ===== 第2步：选择设备 ===== -->
+    <div id="step2" class="step-page">
+      <!-- 步骤指示器 -->
+      <div class="step-indicator">
+        <div class="step-dot completed"></div>
+        <div class="step-dot active"></div>
+      </div>
+      <p class="step-text">第 2 步 / 共 2 步</p>
+
+      <!-- 已选角色提示 -->
+      <div class="selection-summary" id="selectionSummary">
+        <div class="role-badge" id="roleBadge"></div>
+        <div class="device-hint">请选择您当前使用的设备</div>
+      </div>
+
+      <!-- 选项列表 -->
+      <div class="options-list">
+        <button class="option-btn" id="mobileBtn" onclick="selectDevice('mobile')">
+          <div class="option-icon" id="mobileIcon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="12" y="4" width="24" height="40" rx="4"/>
+              <line x1="12" y1="36" x2="36" y2="36"/>
+              <circle cx="24" cy="40" r="2"/>
+            </svg>
+          </div>
+          <div>
+            <div class="option-label">手机访问</div>
+            <div class="option-desc">适合手机、平板等移动设备</div>
+          </div>
+        </button>
+
+        <button class="option-btn" id="desktopBtn" onclick="selectDevice('desktop')">
+          <div class="option-icon" id="desktopIcon">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="4" y="8" width="40" height="24" rx="2"/>
+              <line x1="4" y1="32" x2="44" y2="32"/>
+              <line x1="16" y1="40" x2="32" y2="40"/>
+              <line x1="24" y1="32" x2="24" y2="40"/>
+            </svg>
+          </div>
+          <div>
+            <div class="option-label">电脑访问</div>
+            <div class="option-desc">适合电脑、笔记本等桌面设备</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- 返回按钮 -->
+      <button class="back-btn" onclick="goBack()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        返回上一步
+      </button>
+    </div>
+
+    <!-- ===== 跳转中页面 ===== -->
+    <div id="redirectPage" class="step-page">
+      <div class="redirect-notice">
+        <div class="spinner"></div>
+        <p>正在进入</p>
+        <div class="redirect-target" id="redirectTarget"></div>
+      </div>
+    </div>
+
+    <!-- ===== 页脚（公共） ===== -->
+    <div class="footer">
+      <p>夕阳智语 SunsetAI © 2026</p>
+      <div class="footer-links">
+        <a href="#">使用帮助</a>
+        <a href="#">联系我们</a>
+        <a href="#">隐私政策</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== 状态管理 =====
+    let currentRole = null;
+    let currentStep = 1;
+
+    // 角色配置
+    const roleConfig = {
+      parent: {
+        label: '父母',
+        badgeClass: 'parent-role',
+        badgeText: '我是父母',
+        themeColor: '#d4a574',
+        themeHover: '#c49564',
+        themeLight: '#fffbf7',
+        themeBg: '#ffe8cc'
+      },
+      child: {
+        label: '子女',
+        badgeClass: 'child-role',
+        badgeText: '我是子女',
+        themeColor: '#74a5d4',
+        themeHover: '#6495c4',
+        themeLight: '#f7fcff',
+        themeBg: '#cce8ff'
+      }
+    };
+
+    // 设备配置
+    const deviceConfig = {
+      mobile: {
+        label: '移动端',
+        icon: '📱'
+      },
+      desktop: {
+        label: '桌面端',
+        icon: '🖥️'
+      }
+    };
+
+    // ===== 选择角色 =====
+    function selectRole(role) {
+      currentRole = role;
+      const config = roleConfig[role];
+
+      // 更新第2步的UI主题
+      const mobileBtn = document.getElementById('mobileBtn');
+      const desktopBtn = document.getElementById('desktopBtn');
+      const mobileIcon = document.getElementById('mobileIcon');
+      const desktopIcon = document.getElementById('desktopIcon');
+      const roleBadge = document.getElementById('roleBadge');
+
+      // 应用主题色到按钮
+      mobileBtn.style.borderColor = config.themeColor;
+      desktopBtn.style.borderColor = config.themeColor;
+      mobileBtn.classList.add(role);
+      desktopBtn.classList.add(role);
+
+      // 应用图标背景色和图标颜色
+      mobileIcon.style.background = config.themeBg;
+      desktopIcon.style.background = config.themeBg;
+      mobileIcon.style.color = role === 'parent' ? '#8b6914' : '#1a5276';
+      desktopIcon.style.color = role === 'parent' ? '#8b6914' : '#1a5276';
+
+      // 更新角色徽章
+      roleBadge.className = 'role-badge ' + config.badgeClass;
+      roleBadge.textContent = config.badgeText;
+
+      // 切换页面
+      goToStep(2, 'forward');
+    }
+
+    // ===== 选择设备 =====
+    function selectDevice(device) {
+      const roleConfig_data = roleConfig[currentRole];
+      const deviceConfig_data = deviceConfig[device];
+
+      // 显示跳转页面
+      const redirectTarget = document.getElementById('redirectTarget');
+      redirectTarget.textContent = `${roleConfig_data.label}${deviceConfig_data.label}`;
+
+      // 切换到跳转页面
+      showPage('redirectPage');
+
+      // 执行跳转（实际项目中这里会跳转到对应的路由）
+      const targetRoute = `/${currentRole}-${device}`;
+      console.log('跳转到:', targetRoute);
+
+      // 模拟跳转延迟，展示加载状态
+      setTimeout(() => {
+        // 实际跳转代码：
+        // window.location.href = targetRoute;
+
+        // 演示用：显示跳转信息
+        alert(`即将跳转至：${roleConfig_data.label}${deviceConfig_data.label}\n路由: ${targetRoute}`);
+
+        // 返回首页（演示用）
+        resetAndGoHome();
+      }, 1500);
+    }
+
+    // ===== 返回上一步 =====
+    function goBack() {
+      // 清除第2步的主题样式
+      const mobileBtn = document.getElementById('mobileBtn');
+      const desktopBtn = document.getElementById('desktopBtn');
+      const mobileIcon = document.getElementById('mobileIcon');
+      const desktopIcon = document.getElementById('desktopIcon');
+
+      mobileBtn.style.borderColor = '';
+      desktopBtn.style.borderColor = '';
+      mobileBtn.classList.remove('parent', 'child');
+      desktopBtn.classList.remove('parent', 'child');
+      mobileIcon.style.background = '';
+      desktopIcon.style.background = '';
+      mobileIcon.style.color = '';
+      desktopIcon.style.color = '';
+
+      currentRole = null;
+      goToStep(1, 'backward');
+    }
+
+    // ===== 页面切换 =====
+    function goToStep(step, direction) {
+      currentStep = step;
+
+      // 隐藏所有页面
+      document.querySelectorAll('.step-page').forEach(page => {
+        page.classList.remove('active', 'forward', 'backward');
+      });
+
+      // 显示目标页面
+      const targetPage = document.getElementById(step === 1 ? 'step1' : 'step2');
+      targetPage.classList.add('active', direction);
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll('.step-page').forEach(page => {
+        page.classList.remove('active', 'forward', 'backward');
+      });
+      document.getElementById(pageId).classList.add('active');
+    }
+
+    // ===== 重置并返回首页 =====
+    function resetAndGoHome() {
+      currentRole = null;
+      currentStep = 1;
+
+      // 清除所有主题样式
+      const mobileBtn = document.getElementById('mobileBtn');
+      const desktopBtn = document.getElementById('desktopBtn');
+      const mobileIcon = document.getElementById('mobileIcon');
+      const desktopIcon = document.getElementById('desktopIcon');
+
+      mobileBtn.style.borderColor = '';
+      desktopBtn.style.borderColor = '';
+      mobileBtn.classList.remove('parent', 'child');
+      desktopBtn.classList.remove('parent', 'child');
+      mobileIcon.style.background = '';
+      desktopIcon.style.background = '';
+      mobileIcon.style.color = '';
+      desktopIcon.style.color = '';
+
+      // 显示第1步
+      showPage('step1');
+    }
+
+    // ===== 键盘导航支持 =====
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && currentStep === 2) {
+        goBack();
+      }
+    });
+
+    // ===== 触摸反馈优化 =====
+    document.querySelectorAll('.option-btn').forEach(btn => {
+      btn.addEventListener('touchstart', function() {
+        this.style.transform = 'scale(0.98)';
+      });
+      btn.addEventListener('touchend', function() {
+        this.style.transform = '';
+      });
+    });
+  </script>
+</body>
+</html>

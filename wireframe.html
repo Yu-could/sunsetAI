@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>夕阳智语 SunsetAI - 首页布局线框图</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; background: #f0f0f0; color: #333; }
+    
+    .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+    
+    h1 { text-align: center; font-size: 36px; margin-bottom: 8px; color: #1a1a1a; }
+    h2 { font-size: 26px; margin-bottom: 24px; color: #2a2a2a; border-bottom: 3px solid #d4a574; padding-bottom: 12px; }
+    h3 { font-size: 20px; margin-bottom: 16px; color: #3a3a3a; }
+    h4 { font-size: 16px; margin-bottom: 12px; color: #4a4a4a; }
+    
+    .subtitle { text-align: center; color: #666; margin-bottom: 48px; font-size: 18px; }
+    
+    .scheme-section { background: white; border-radius: 20px; padding: 40px; margin-bottom: 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+    
+    .wireframe-container { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 30px; }
+    
+    @media (max-width: 1000px) {
+      .wireframe-container { grid-template-columns: 1fr; }
+    }
+    
+    .device-frame {
+      background: #d0d0d0;
+      border-radius: 12px;
+      padding: 24px;
+      position: relative;
+    }
+    
+    .device-frame.desktop { min-height: 640px; }
+    .device-frame.mobile { max-width: 380px; margin: 0 auto; min-height: 720px; }
+    
+    .device-label {
+      position: absolute;
+      top: -14px;
+      left: 24px;
+      background: #333;
+      color: white;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    
+    .mobile .device-label { left: 50%; transform: translateX(-50%); }
+    
+    .screen {
+      background: white;
+      width: 100%;
+      height: 100%;
+      min-height: 590px;
+      border-radius: 6px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .mobile .screen { min-height: 670px; border-radius: 28px; border: 14px solid #1a1a1a; padding: 36px 24px; }
+    
+    .mobile .screen::after {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 130px;
+      height: 22px;
+      background: #1a1a1a;
+      border-radius: 11px;
+    }
+    
+    .annotation {
+      position: absolute;
+      background: rgba(212, 165, 116, 0.12);
+      border: 1px dashed #d4a574;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 11px;
+      color: #d4a574;
+      font-weight: bold;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    .annotation.logo { top: 30px; left: 50%; transform: translateX(-50%); }
+    .annotation.brand { top: 130px; left: 50%; transform: translateX(-50%); }
+    .annotation.main { top: 200px; left: 16px; }
+    .annotation.info { bottom: 100px; left: 50%; transform: translateX(-50%); }
+    .annotation.footer { bottom: 16px; left: 50%; transform: translateX(-50%); }
+    
+    .mobile .annotation.logo { top: 50px; }
+    .mobile .annotation.brand { top: 150px; }
+    .mobile .annotation.main { top: 220px; }
+    
+    .logo-area {
+      text-align: center;
+      margin-bottom: 24px;
+      flex-shrink: 0;
+    }
+    
+    .logo-box {
+      width: 90px;
+      height: 90px;
+      background: #e8e8e8;
+      border-radius: 24px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #ddd;
+    }
+    
+    .logo-icon { font-size: 44px; }
+    
+    .brand-title { font-size: 32px; font-weight: bold; color: #1a1a1a; margin-bottom: 8px; text-align: center; }
+    .brand-subtitle { font-size: 15px; color: #888; text-align: center; margin-bottom: 20px; }
+    
+    .tagline {
+      text-align: center;
+      font-size: 17px;
+      color: #555;
+      margin-bottom: 32px;
+      line-height: 1.6;
+      flex-shrink: 0;
+    }
+    
+    .main-action-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 16px;
+    }
+    
+    .card-grid-desktop {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    
+    .card-grid-mobile {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    
+    .entry-card {
+      background: #fafafa;
+      border: 2px solid #e5e5e5;
+      border-radius: 18px;
+      padding: 28px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+      position: relative;
+    }
+    
+    .entry-card:hover { background: #f5f5f5; border-color: #d0d0d0; transform: translateY(-2px); }
+    
+    .entry-card.parent-group { border-color: #d4a574; background: #fffbf7; }
+    .entry-card.parent-group:hover { background: #fff5e8; }
+    
+    .entry-card.child-group { border-color: #74a5d4; background: #f7fcff; }
+    .entry-card.child-group:hover { background: #e8f4ff; }
+    
+    .card-icon {
+      width: 56px;
+      height: 56px;
+      background: #e8e8e8;
+      border-radius: 14px;
+      margin: 0 auto 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+    }
+    
+    .entry-card.parent-group .card-icon { background: #ffe8cc; }
+    .entry-card.child-group .card-icon { background: #cce8ff; }
+    
+    .card-title { font-size: 20px; font-weight: bold; color: #222; margin-bottom: 8px; }
+    .card-desc { font-size: 14px; color: #777; }
+    
+    .group-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .group-label {
+      font-size: 14px;
+      font-weight: bold;
+      color: #555;
+      text-align: center;
+      padding: 8px 16px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      display: inline-block;
+      align-self: center;
+    }
+    
+    .group-label.parent { color: #d4a574; background: #fffbf7; }
+    .group-label.child { color: #74a5d4; background: #f7fcff; }
+    
+    .large-button {
+      background: #d4a574;
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 28px 36px;
+      font-size: 22px;
+      font-weight: bold;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    
+    .large-button:hover { background: #c49564; transform: translateY(-2px); }
+    .large-button.child { background: #74a5d4; }
+    .large-button.child:hover { background: #6495c4; }
+    
+    .step-indicator {
+      text-align: center;
+      font-size: 15px;
+      color: #999;
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+    
+    .back-link {
+      text-align: center;
+      color: #666;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 20px;
+      padding: 12px;
+    }
+    
+    .back-link:hover { color: #333; text-decoration: underline; }
+    
+    .info-section {
+      background: #f8f8f8;
+      border-radius: 10px;
+      padding: 18px;
+      margin-top: 24px;
+      font-size: 13px;
+      color: #666;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    
+    .footer-section {
+      text-align: center;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid #eee;
+      font-size: 12px;
+      color: #aaa;
+      flex-shrink: 0;
+    }
+    
+    .design-notes {
+      margin-top: 36px;
+      padding: 24px;
+      background: #fffbf7;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.8;
+      color: #555;
+    }
+    
+    .design-notes h4 { color: #d4a574; margin-bottom: 14px; }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .info-box {
+      background: #f8f8f8;
+      border-radius: 10px;
+      padding: 20px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #555;
+    }
+    
+    .interaction-flow {
+      background: #f0f8ff;
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 24px;
+    }
+    
+    .interaction-flow h4 { color: #74a5d4; margin-bottom: 16px; }
+    
+    .flow-step {
+      display: flex;
+      align-items: center;
+      margin-bottom: 14px;
+      font-size: 15px;
+      color: #444;
+    }
+    
+    .flow-number {
+      width: 32px;
+      height: 32px;
+      background: #74a5d4;
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 14px;
+      flex-shrink: 0;
+    }
+    
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+      font-size: 14px;
+    }
+    
+    .comparison-table th, .comparison-table td {
+      border: 1px solid #e0e0e0;
+      padding: 14px;
+      text-align: left;
+    }
+    
+    .comparison-table th {
+      background: #f5f5f5;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .comparison-table tr:nth-child(even) { background: #fafafa; }
+    
+    .highlight {
+      background: #fffbf7;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-weight: bold;
+      color: #d4a574;
+    }
+    
+    .color-palette {
+      display: flex;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .color-swatch {
+      width: 70px;
+      height: 70px;
+      border-radius: 10px;
+      border: 2px solid #fff;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    
+    .color-swatch::after {
+      content: attr(data-name);
+      position: absolute;
+      bottom: -28px;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+    }
+    
+    .hierarchy-tree {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 24px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 13px;
+      line-height: 2.2;
+      color: #444;
+    }
+    
+    .principles-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 20px;
+    }
+    
+    .principle-card {
+      background: #f8f8f8;
+      border-radius: 10px;
+      padding: 20px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #555;
+    }
+    
+    .principle-card h5 {
+      font-size: 15px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 12px;
+    }
+    
+    .principle-card.visual { border-left: 4px solid #d4a574; }
+    .principle-card.interaction { border-left: 4px solid #74a5d4; }
+    .principle-card.content { border-left: 4px solid #74d4a5; }
+    .principle-card.technical { border-left: 4px solid #d474a5; }
+    
+    .rec-section {
+      background: linear-gradient(135deg, #fffbf7 0%, #fff8ef 100%);
+      border: 1px solid #ffe0c0;
+      border-radius: 12px;
+      padding: 24px;
+      margin-top: 24px;
+    }
+    
+    .rec-section h4 { color: #d4a574; font-size: 18px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>夕阳智语 SunsetAI</h1>
+    <p class="subtitle">AI语音助老助手 - 首页布局线框图设计方案</p>
+    
+    <div class="scheme-section">
+      <h2>方案 A：直接展示入口卡片（优化分组和层级）</h2>
+      <p style="font-size: 15px; color: #666; margin-bottom: 24px; line-height: 1.6;">
+        首页直接展示四个入口卡片，通过视觉分组和颜色层级清晰区分"父母"与"子女"两大角色，让用户一眼就能识别并找到自己的入口。适合追求效率的子女用户和熟悉智能手机的长辈用户。
+      </p>
+      
+      <div class="wireframe-container">
+        <div class="device-frame desktop">
+          <div class="device-label">桌面端 Desktop (1280px+)</div>
+          <div class="screen">
+            <div class="annotation logo">Logo 区域</div>
+            <div class="annotation brand">品牌标题与副标题</div>
+            <div class="annotation main">主操作区</div>
+            <div class="annotation info">说明信息区</div>
+            <div class="annotation footer">页脚信息区</div>
+            
+            <div class="logo-area">
+              <div class="logo-box">
+                <span class="logo-icon">☀️</span>
+              </div>
+            </div>
+            
+            <div class="brand-title">夕阳智语</div>
+            <div class="brand-subtitle">SunsetAI - AI语音助老助手</div>
+            
+            <div class="tagline">专为中老年人设计的智能语音助手<br>让科技温暖每一位长辈</div>
+            
+            <div class="main-action-area">
+              <div class="card-grid-desktop">
+                <div class="group-wrapper">
+                  <div class="group-label parent">👴 我是父母</div>
+                  <div class="entry-card parent-group">
+                    <div class="card-icon">📱</div>
+                    <div class="card-title">父母移动端</div>
+                    <div class="card-desc">适合手机访问</div>
+                  </div>
+                  <div class="entry-card parent-group">
+                    <div class="card-icon">🖥️</div>
+                    <div class="card-title">父母桌面端</div>
+                    <div class="card-desc">适合电脑访问</div>
+                  </div>
+                </div>
+                
+                <div class="group-wrapper">
+                  <div class="group-label child">👶 我是子女</div>
+                  <div class="entry-card child-group">
+                    <div class="card-icon">📱</div>
+                    <div class="card-title">子女移动端</div>
+                    <div class="card-desc">适合手机访问</div>
+                  </div>
+                  <div class="entry-card child-group">
+                    <div class="card-icon">🖥️</div>
+                    <div class="card-title">子女桌面端</div>
+                    <div class="card-desc">适合电脑访问</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="info-section">
+              温馨提示：请根据您的身份和使用设备选择对应的入口
+            </div>
+            
+            <div class="footer-section">
+              夕阳智语 SunsetAI © 2026 | 关爱老人，温暖陪伴
+            </div>
+          </div>
+        </div>
+        
+        <div class="device-frame mobile">
+          <div class="device-label">移动端 Mobile (375px)</div>
+          <div class="screen">
+            <div class="annotation logo">Logo 区域</div>
+            <div class="annotation brand">品牌标题与副标题</div>
+            <div class="annotation main">主操作区</div>
+            <div class="annotation info">说明信息区</div>
+            <div class="annotation footer">页脚信息区</div>
+            
+            <div class="logo-area">
+              <div class="logo-box">
+                <span class="logo-icon">☀️</span>
+              </div>
+            </div>
+            
+            <div class="brand-title">夕阳智语</div>
+            <div class="brand-subtitle">SunsetAI</div>
+            
+            <div class="tagline">AI语音助老助手</div>
+            
+            <div class="main-action-area">
+              <div class="card-grid-mobile">
+                <div class="group-label parent" style="width: 100%;">👴 我是父母</div>
+                <div class="entry-card parent-group" style="padding: 32px 24px;">
+                  <div class="card-icon" style="width: 64px; height: 64px; font-size: 34px; margin-bottom: 18px;">📱</div>
+                  <div class="card-title" style="font-size: 22px;">父母移动端</div>
+                  <div class="card-desc" style="font-size: 15px;">适合手机访问</div>
+                </div>
+                <div class="entry-card parent-group" style="padding: 32px 24px;">
+                  <div class="card-icon" style="width: 64px; height: 64px; font-size: 34px; margin-bottom: 18px;">🖥️</div>
+                  <div class="card-title" style="font-size: 22px;">父母桌面端</div>
+                  <div class="card-desc" style="font-size: 15px;">适合电脑访问</div>
+                </div>
+                
+                <div class="group-label child" style="width: 100%; margin-top: 28px;">👶 我是子女</div>
+                <div class="entry-card child-group" style="padding: 32px 24px;">
+                  <div class="card-icon" style="width: 64px; height: 64px; font-size: 34px; margin-bottom: 18px;">📱</div>
+                  <div class="card-title" style="font-size: 22px;">子女移动端</div>
+                  <div class="card-desc" style="font-size: 15px;">适合手机访问</div>
+                </div>
+                <div class="entry-card child-group" style="padding: 32px 24px;">
+                  <div class="card-icon" style="width: 64px; height: 64px; font-size: 34px; margin-bottom: 18px;">🖥️</div>
+                  <div class="card-title" style="font-size: 22px;">子女桌面端</div>
+                  <div class="card-desc" style="font-size: 15px;">适合电脑访问</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="info-section" style="font-size: 14px;">
+              请根据您的身份和使用设备选择入口
+            </div>
+            
+            <div class="footer-section">
+              夕阳智语 © 2026
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="design-notes">
+        <h4>设计要点</h4>
+        <ul>
+          <li><strong>分组清晰：</strong>通过颜色边框和标签将四个入口分为"父母"和"子女"两组，降低选择难度</li>
+          <li><strong>视觉层级：</strong>父母组使用暖橙色系（#d4a574）表达温暖亲切，子女组使用冷蓝色系（#74a5d4）表达专业可靠</li>
+          <li><strong>移动端单列：</strong>手机端采用垂直单列布局，每个卡片高度≥120px，方便长辈手指点击</li>
+          <li><strong>大字号：</strong>卡片标题≥20px，副标题≥14px，确保长辈清晰阅读</li>
+          <li><strong>充足留白：</strong>卡片间距≥16px，内容四周留白充足，避免视觉拥挤</li>
+          <li><strong>圆角设计：</strong>卡片圆角18px，按钮圆角16px，柔和亲切的视觉感受</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="scheme-section">
+      <h2>方案 B：两步选择（先选角色，再选设备）</h2>
+      <p style="font-size: 15px; color: #666; margin-bottom: 24px; line-height: 1.6;">
+        首页先让用户选择"我是父母"或"我是子女"，进入第二步后再选择"手机访问"或"电脑访问"。将四个选项分解为两次二元选择，大大降低长辈用户的认知负担和选择压力，是更适合中老年用户的设计方案。
+      </p>
+      
+      <div class="wireframe-container">
+        <div class="device-frame desktop">
+          <div class="device-label">桌面端 Desktop (1280px+)</div>
+          <div class="screen">
+            <div class="annotation logo">Logo 区域</div>
+            <div class="annotation brand">品牌标题与副标题</div>
+            <div class="annotation main">主操作区</div>
+            <div class="annotation info">说明信息区</div>
+            <div class="annotation footer">页脚信息区</div>
+            
+            <div class="logo-area">
+              <div class="logo-box">
+                <span class="logo-icon">☀️</span>
+              </div>
+            </div>
+            
+            <div class="brand-title">夕阳智语</div>
+            <div class="brand-subtitle">SunsetAI - AI语音助老助手</div>
+            
+            <div class="tagline">您是长辈还是子女？<br>请选择您的身份</div>
+            
+            <div class="main-action-area">
+              <div class="step-indicator">第 1 步 / 共 2 步</div>
+              
+              <div style="display: flex; flex-direction: column; gap: 24px;">
+                <button class="large-button" style="font-size: 26px; padding: 34px;" onclick="showStep2Desktop()">
+                  👴 我是父母
+                </button>
+                <button class="large-button child" style="font-size: 26px; padding: 34px;" onclick="showStep2Desktop()">
+                  👶 我是子女
+                </button>
+              </div>
+              
+              <div style="display: none;" id="step2-desktop">
+                <div class="step-indicator">第 2 步 / 共 2 步</div>
+                
+                <div class="tagline">请选择您的访问设备</div>
+                
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                  <button class="large-button" style="font-size: 24px; padding: 32px;">
+                    📱 手机访问
+                  </button>
+                  <button class="large-button child" style="font-size: 24px; padding: 32px;">
+                    🖥️ 电脑访问
+                  </button>
+                </div>
+                
+                <div class="back-link" onclick="showStep1Desktop()">← 返回上一步</div>
+              </div>
+            </div>
+            
+            <div class="info-section">
+              只需两步，即可进入适合您的使用界面
+            </div>
+            
+            <div class="footer-section">
+              夕阳智语 SunsetAI © 2026 | 关爱老人，温暖陪伴
+            </div>
+          </div>
+        </div>
+        
+        <div class="device-frame mobile">
+          <div class="device-label">移动端 Mobile (375px)</div>
+          <div class="screen">
+            <div class="annotation logo">Logo 区域</div>
+            <div class="annotation brand">品牌标题与副标题</div>
+            <div class="annotation main">主操作区</div>
+            <div class="annotation info">说明信息区</div>
+            <div class="annotation footer">页脚信息区</div>
+            
+            <div class="logo-area">
+              <div class="logo-box">
+                <span class="logo-icon">☀️</span>
+              </div>
+            </div>
+            
+            <div class="brand-title">夕阳智语</div>
+            <div class="brand-subtitle">SunsetAI</div>
+            
+            <div class="tagline">您是长辈还是子女？</div>
+            
+            <div class="main-action-area">
+              <div class="step-indicator">第 1 步</div>
+              
+              <div style="display: flex; flex-direction: column; gap: 24px;">
+                <button class="large-button" style="font-size: 26px; padding: 40px;" onclick="showStep2Mobile()">
+                  👴<br>我是父母
+                </button>
+                <button class="large-button child" style="font-size: 26px; padding: 40px;" onclick="showStep2Mobile()">
+                  👶<br>我是子女
+                </button>
+              </div>
+              
+              <div style="display: none;" id="step2-mobile">
+                <div class="step-indicator">第 2 步</div>
+                
+                <div class="tagline">请选择访问设备</div>
+                
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                  <button class="large-button" style="font-size: 24px; padding: 36px;">
+                    📱<br>手机访问
+                  </button>
+                  <button class="large-button child" style="font-size: 24px; padding: 36px;">
+                    🖥️<br>电脑访问
+                  </button>
+                </div>
+                
+                <div class="back-link" onclick="showStep1Mobile()">← 返回</div>
+              </div>
+            </div>
+            
+            <div class="info-section" style="font-size: 14px;">
+              两步选择，轻松进入
+            </div>
+            
+            <div class="footer-section">
+              夕阳智语 © 2026
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="design-notes">
+        <h4>设计要点</h4>
+        <ul>
+          <li><strong>分步决策：</strong>将四个选择分解为两步，每次只做二元选择，认知负担最低</li>
+          <li><strong>超大按钮：</strong>桌面端按钮高度≥80px，移动端≥100px，确保长辈手指轻松点击</li>
+          <li><strong>清晰步骤：</strong>顶部显示当前步骤进度，让用户明确知道所处位置</li>
+          <li><strong>返回机制：</strong>提供返回上一步的选项，避免选错后无法挽回</li>
+          <li><strong>表情辅助：</strong>使用👴👶📱🖥️等表情符号，增强视觉识别度和亲和力</li>
+          <li><strong>渐进式展示：</strong>每次只展示两个选项，减少视觉干扰</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="scheme-section">
+      <h2>交互逻辑说明</h2>
+      
+      <div class="interaction-flow">
+        <h4>方案 A 交互流程</h4>
+        <div class="flow-step">
+          <span class="flow-number">1</span>
+          用户进入首页 → 看到品牌信息和四个入口卡片
+        </div>
+        <div class="flow-step">
+          <span class="flow-number">2</span>
+          用户识别自己的角色分组（父母组/子女组）
+        </div>
+        <div class="flow-step">
+          <span class="flow-number">3</span>
+          用户在对应分组中选择设备入口（手机/电脑）
+        </div>
+        <div class="flow-step">
+          <span class="flow-number">4</span>
+          直接跳转至登录页面或对应端首页
+        </div>
+      </div>
+      
+      <div class="interaction-flow" style="margin-top: 24px;">
+        <h4>方案 B 交互流程</h4>
+        <div class="flow-step">
+          <span class="flow-number">1</span>
+          用户进入首页 → 看到品牌信息和两个角色按钮
+        </div>
+        <div class="flow-step">
+          <span class="flow-number">2</span>
+          用户点击"我是父母"或"我是子女"（页面局部刷新）
+        </div>
+        <div class="flow-step">
+          <span class="flow-number">3</span>
+          页面切换至第二步 → 显示两个设备选择按钮和返回链接
+        </div>
+        <div class="flow-step">
+          <span class="flow-number">4</span>
+          用户选择"手机访问"或"电脑访问"
+        </div>
+        <div class="flow-step">
+          <span class="flow-number">5</span>
+          跳转至登录页面或对应端首页
+        </div>
+      </div>
+    </div>
+    
+    <div class="scheme-section">
+      <h2>方案对比与推荐</h2>
+      
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>对比维度</th>
+            <th>方案 A：直接展示卡片</th>
+            <th>方案 B：两步选择</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>选择步数</strong></td>
+            <td>1 步直接选择</td>
+            <td>2 步选择</td>
+          </tr>
+          <tr>
+            <td><strong>认知负担</strong></td>
+            <td>中等（需同时识别角色和设备）</td>
+            <td><span class="highlight">低（每次只需做二元选择）</span></td>
+          </tr>
+          <tr>
+            <td><strong>适老化程度</strong></td>
+            <td>良好</td>
+            <td><span class="highlight">优秀（分步决策更友好）</span></td>
+          </tr>
+          <tr>
+            <td><strong>页面效率</strong></td>
+            <td><span class="highlight">高（一步到位）</span></td>
+            <td>中等（需两次点击）</td>
+          </tr>
+          <tr>
+            <td><strong>视觉复杂度</strong></td>
+            <td>中等（四个卡片并列）</td>
+            <td><span class="highlight">低（每次只显示两个选项）</span></td>
+          </tr>
+          <tr>
+            <td><strong>子女用户体验</strong></td>
+            <td><span class="highlight">好（快速找到入口）</span></td>
+            <td>一般（多一步操作）</td>
+          </tr>
+          <tr>
+            <td><strong>错误率</strong></td>
+            <td>中等（容易选错角色或设备）</td>
+            <td><span class="highlight">低（分步验证，可返回）</span></td>
+          </tr>
+          <tr>
+            <td><strong>推荐场景</strong></td>
+            <td>子女用户为主，追求效率</td>
+            <td><span class="highlight">父母用户为主，追求简单</span></td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div class="rec-section">
+        <h4>综合推荐</h4>
+        <p style="font-size: 15px; line-height: 1.8; color: #555; margin-top: 12px;">
+          <strong>推荐方案 B（两步选择）作为主方案</strong>，理由如下：
+        </p>
+        <ol style="font-size: 15px; line-height: 1.8; color: #555; margin-left: 20px; margin-top: 12px;">
+          <li><strong>降低长辈选择压力：</strong>每次只做二元选择，比同时面对四个选项更轻松</li>
+          <li><strong>适老化设计最优：</strong>更大的按钮、更清晰的步骤指引，更适合中老年用户</li>
+          <li><strong>容错性更好：</strong>提供返回上一步的选项，用户选错后可以轻松修正</li>
+          <li><strong>学习成本更低：</strong>简单的两步流程，长辈更容易理解和记忆</li>
+        </ol>
+        <p style="font-size: 15px; line-height: 1.8; color: #555; margin-top: 16px;">
+          <strong>优化建议：</strong>如果需要兼顾子女用户的效率，可以在方案 B 的第二步页面增加"快速入口"链接，让熟悉产品的子女用户可以快速跳过选择直接进入对应端。
+        </p>
+      </div>
+    </div>
+    
+    <div class="scheme-section">
+      <h2>视觉设计规范</h2>
+      
+      <h3>1. 色彩方案</h3>
+      <div class="color-palette">
+        <div class="color-swatch" style="background: #d4a574;" data-name="主色调（暖橙）"></div>
+        <div class="color-swatch" style="background: #74a5d4;" data-name="次色调（天蓝）"></div>
+        <div class="color-swatch" style="background: #ffffff;" data-name="背景色（白）"></div>
+        <div class="color-swatch" style="background: #f5f5f5;" data-name="辅助背景"></div>
+        <div class="color-swatch" style="background: #222222;" data-name="文字主色"></div>
+        <div class="color-swatch" style="background: #666666;" data-name="文字辅色"></div>
+      </div>
+      <p style="font-size: 14px; color: #666; margin-top: 48px; line-height: 1.6;">
+        <strong>色彩含义：</strong><br>
+        暖橙色（#d4a574）代表温暖、亲切、关怀，用于父母相关元素，营造家的感觉；<br>
+        天蓝色（#74a5d4）代表专业、可靠、信任，用于子女相关元素，传达安心守护的理念。
+      </p>
+      
+      <h3>2. 字体规范</h3>
+      <div class="info-grid">
+        <div class="info-box">
+          <h4 style="color: #333;">桌面端字体大小</h4>
+          Logo 图标：44-52px<br>
+          品牌标题：32-36px<br>
+          副标题：15-16px<br>
+          引导语：17-18px<br>
+          卡片/按钮标题：20-26px<br>
+          卡片描述：14px<br>
+          说明文字：14-15px<br>
+          页脚文字：12px
+        </div>
+        <div class="info-box">
+          <h4 style="color: #333;">移动端字体大小</h4>
+          Logo 图标：44-52px<br>
+          品牌标题：28-32px<br>
+          副标题：14-15px<br>
+          引导语：16-17px<br>
+          卡片/按钮标题：22-26px<br>
+          卡片描述：15-16px<br>
+          说明文字：14-15px<br>
+          页脚文字：12px
+        </div>
+      </div>
+      
+      <h3>3. 按钮规范</h3>
+      <div class="info-grid">
+        <div class="info-box">
+          <h4 style="color: #333;">桌面端按钮</h4>
+          卡片式按钮：最小宽度 220px，高度 130px<br>
+          大按钮：宽度 100%，高度 88-100px<br>
+          圆角：16-18px<br>
+          字体：20-26px，加粗<br>
+          内边距：上下 28px，左右 36px
+        </div>
+        <div class="info-box">
+          <h4 style="color: #333;">移动端按钮</h4>
+          卡片式按钮：宽度 100%，高度 130-144px<br>
+          大按钮：宽度 100%，高度 108-120px<br>
+          圆角：16-18px<br>
+          字体：22-26px，加粗<br>
+          内边距：上下 32px，左右 24px
+        </div>
+      </div>
+      
+      <h3>4. 间距规范</h3>
+      <div class="info-box">
+        <h4 style="color: #333;">通用间距</h4>
+        页面边距：桌面端 40px，移动端 24px<br>
+        卡片间距：桌面端 24px，移动端 18px<br>
+        内容区块上下留白：≥32px<br>
+        行距：1.6-1.8 倍<br>
+        Logo 与标题间距：16px<br>
+        标题与副标题间距：8px<br>
+        副标题与引导语间距：20px<br>
+        所有间距使用 4px 的倍数，保持视觉一致性
+      </div>
+    </div>
+    
+    <div class="scheme-section">
+      <h2>信息层级结构图</h2>
+      
+      <div class="hierarchy-tree">
+首页信息层级<br>
+├── 第1层：品牌识别区（最高优先级）<br>
+│   ├── Logo 图标（☀️ 太阳形象，传达温暖关怀）<br>
+│   ├── 品牌标题「夕阳智语」（大字号加粗）<br>
+│   └── 副标题「SunsetAI - AI语音助老助手」<br>
+│<br>
+├── 第2层：引导区（辅助理解）<br>
+│   └── 一句话描述/引导语（如"您是长辈还是子女？"）<br>
+│<br>
+├── 第3层：主操作区（核心功能，最大视觉权重）<br>
+│   ├── 方案A：四卡片分组布局<br>
+│   │   ├── 父母组（暖橙色系 #d4a574）<br>
+│   │   │   ├── 父母移动端（📱 图标）<br>
+│   │   │   └── 父母桌面端（🖥️ 图标）<br>
+│   │   └── 子女组（天蓝色系 #74a5d4）<br>
+│   │       ├── 子女移动端（📱 图标）<br>
+│   │       └── 子女桌面端（🖥️ 图标）<br>
+│   │<br>
+│   └── 方案B：两步选择流程<br>
+│       ├── 第1步：选择角色（父母/子女）<br>
+│       └── 第2步：选择设备（手机/电脑）<br>
+│<br>
+├── 第4层：说明信息区（辅助说明）<br>
+│   └── 使用提示/帮助信息（温馨提示文案）<br>
+│<br>
+└── 第5层：页脚信息区（最低优先级）<br>
+    ├── 版权信息<br>
+    └── 服务条款/隐私政策链接<br>
+      </div>
+    </div>
+    
+    <div class="scheme-section">
+      <h2>适老化设计要点总结</h2>
+      
+      <div class="principles-grid">
+        <div class="principle-card visual">
+          <h5>视觉层面</h5>
+          ✓ 大字号（正文≥14px，标题≥18px）<br>
+          ✓ 强对比度（文字与背景对比≥4.5:1）<br>
+          ✓ 清晰的视觉分组（颜色编码）<br>
+          ✓ 充足的留白空间（避免拥挤）<br>
+          ✓ 避免低对比度颜色组合<br>
+          ✓ 圆角设计（柔和亲切）
+        </div>
+        <div class="principle-card interaction">
+          <h5>交互层面</h5>
+          ✓ 大按钮（移动端≥100px高度）<br>
+          ✓ 简单的操作流程（最少步骤）<br>
+          ✓ 明确的反馈提示（点击反馈）<br>
+          ✓ 支持返回/撤销操作<br>
+          ✓ 避免复杂手势（如滑动切换）<br>
+          ✓ 悬停状态提示（桌面端）
+        </div>
+        <div class="principle-card content">
+          <h5>内容层面</h5>
+          ✓ 简洁易懂的文案（口语化表达）<br>
+          ✓ 使用表情/图标辅助理解<br>
+          ✓ 减少专业术语<br>
+          ✓ 提供清晰的指引说明<br>
+          ✓ 步骤进度可视化<br>
+          ✓ 温馨亲切的语气
+        </div>
+        <div class="principle-card technical">
+          <h5>技术层面</h5>
+          ✓ 响应式设计适配各种屏幕<br>
+          ✓ 支持键盘导航（Tab键操作）<br>
+          ✓ 支持屏幕阅读器（ARIA标签）<br>
+          ✓ 页面加载速度快（减少等待）<br>
+          ✓ 兼容主流浏览器（Chrome、Edge）<br>
+          ✓ 触摸目标尺寸≥44px×44px
+        </div>
+      </div>
+    </div>
+    
+    <div style="text-align: center; padding: 30px; color: #888; font-size: 15px; border-top: 1px solid #ddd; margin-top: 40px;">
+      夕阳智语 SunsetAI - AI语音助老助手首页线框图设计方案<br>
+      设计目标：让科技温暖每一位长辈
+    </div>
+  </div>
+  
+  <script>
+    function showStep2Desktop() {
+      var step1Buttons = document.querySelectorAll('.desktop .large-button:not(#step2-desktop .large-button)');
+      step1Buttons.forEach(function(btn) { btn.style.display = 'none'; });
+      document.querySelector('.desktop .step-indicator').textContent = '第 2 步 / 共 2 步';
+      document.querySelector('.desktop .tagline').innerHTML = '请选择您的访问设备';
+      document.getElementById('step2-desktop').style.display = 'block';
+    }
+    
+    function showStep1Desktop() {
+      var step1Buttons = document.querySelectorAll('.desktop .large-button:not(#step2-desktop .large-button)');
+      step1Buttons.forEach(function(btn) { btn.style.display = 'block'; });
+      document.querySelector('.desktop .step-indicator').textContent = '第 1 步 / 共 2 步';
+      document.querySelector('.desktop .tagline').innerHTML = '您是长辈还是子女？<br>请选择您的身份';
+      document.getElementById('step2-desktop').style.display = 'none';
+    }
+    
+    function showStep2Mobile() {
+      var step1Buttons = document.querySelectorAll('.mobile .large-button:not(#step2-mobile .large-button)');
+      step1Buttons.forEach(function(btn) { btn.style.display = 'none'; });
+      document.querySelector('.mobile .step-indicator').textContent = '第 2 步';
+      document.querySelector('.mobile .tagline').textContent = '请选择访问设备';
+      document.getElementById('step2-mobile').style.display = 'block';
+    }
+    
+    function showStep1Mobile() {
+      var step1Buttons = document.querySelectorAll('.mobile .large-button:not(#step2-mobile .large-button)');
+      step1Buttons.forEach(function(btn) { btn.style.display = 'block'; });
+      document.querySelector('.mobile .step-indicator').textContent = '第 1 步';
+      document.querySelector('.mobile .tagline').textContent = '您是长辈还是子女？';
+      document.getElementById('step2-mobile').style.display = 'none';
+    }
+  </script>
+</body>
+</html

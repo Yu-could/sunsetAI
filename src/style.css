@@ -1,0 +1,199 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-parent: #d4a574;
+  --color-parent-hover: #c49564;
+  --color-parent-light: #fffbf7;
+  --color-parent-bg: #ffe8cc;
+  --color-child: #74a5d4;
+  --color-child-hover: #6495c4;
+  --color-child-light: #f7fcff;
+  --color-child-bg: #cce8ff;
+  --color-bg: #f8f6f3;
+  --color-card: #ffffff;
+  --color-text: #1a1a1a;
+  --color-text-secondary: #555555;
+  --color-text-muted: #888888;
+  --color-border: #e8e5e0;
+  --color-info-bg: #f5f3f0;
+  --color-shadow: rgba(0, 0, 0, 0.08);
+  --color-shadow-hover: rgba(0, 0, 0, 0.12);
+
+  --font-title: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  --font-body: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+
+  --font-size-title-xl: 2.5rem;
+  --font-size-title-lg: 1.625rem;
+  --font-size-title-md: 1.25rem;
+  --font-size-body-lg: 1.125rem;
+  --font-size-body-base: 1rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.4s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-bg);
+  min-height: 100vh;
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+button {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+button:focus {
+  outline: none;
+}
+
+input:focus {
+  outline: none;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #BDC3C7;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #7F8C8D;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-text);
+}
+
+h1 {
+  font-size: var(--font-size-title-xl);
+}
+
+h2 {
+  font-size: var(--font-size-title-lg);
+}
+
+h3 {
+  font-size: var(--font-size-title-md);
+}
+
+p, span, div {
+  font-family: var(--font-body);
+  font-size: var(--font-size-body-lg);
+  color: var(--color-text-secondary);
+}
+
+a {
+  color: var(--color-child);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--color-parent);
+}
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease;
+}
+
+.animate-slide-right {
+  animation: slideInRight 0.4s ease;
+}
+
+.animate-slide-left {
+  animation: slideInLeft 0.4s ease;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
