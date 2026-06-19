@@ -1,26 +1,26 @@
 <template>
-  <div class="px-4 py-6 max-w-md mx-auto">
-    <header class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-primary mb-2">夕阳智语</h1>
-      <p class="text-gray-500 text-lg">SunsetAI</p>
-      <p class="text-gray-600 mt-2">为老年人构建的AI语音助手</p>
-      <button @click="goToChild" class="mt-4 text-blue-500 hover:text-blue-600 text-sm underline">子女端入口 →</button>
+  <div class="px-4 py-4 max-w-md mx-auto">
+    <header class="text-center mb-4">
+      <h1 class="text-2xl font-bold text-primary">夕阳智语</h1>
+      <p class="text-gray-500 text-sm mt-1">SunsetAI</p>
     </header>
-    <div class="grid grid-cols-2 gap-4 mb-8">
-      <div v-for="card in featureCards" :key="card.title" @click="goToPage(card.route)" class="bg-white rounded-xl shadow-md p-4 text-center hover:shadow-lg hover:scale-105 transition-all cursor-pointer active:scale-95">
-        <div :class="card.bgColor" class="w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-3">
-          <component :is="iconComponents[card.icon]" :class="card.color" class="w-8 h-8" />
+
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div v-for="card in featureCards" :key="card.title" @click="goToPage(card.route)" class="bg-white rounded-xl shadow-sm p-3 text-center hover:shadow-md transition-all cursor-pointer active:scale-95">
+        <div :class="card.bgColor" class="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-2">
+          <component :is="iconComponents[card.icon]" :class="card.color" class="w-6 h-6" />
         </div>
-        <h3 class="text-lg font-bold text-gray-800">{{ card.title }}</h3>
-        <p class="text-sm text-gray-500 mt-1">{{ card.desc }}</p>
+        <h3 class="text-base font-bold text-gray-800">{{ card.title }}</h3>
+        <p class="text-xs text-gray-500 mt-0.5">{{ card.desc }}</p>
       </div>
     </div>
-    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-      <div class="flex items-center justify-between mb-4">
-        <h2 class="text-xl font-bold text-gray-800">今日状态</h2>
-        <span class="text-sm text-gray-400">{{ today }}</span>
+
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold text-gray-800">今日状态</h2>
+        <span class="text-xs text-gray-400">{{ today }}</span>
       </div>
-      <div class="space-y-3">
+      <div class="space-y-2">
         <div class="flex items-center justify-between py-2 border-b border-gray-100">
           <span class="text-gray-600">签到状态</span>
           <span :class="safetyStatus ? 'text-green-500' : 'text-red-500'" class="font-bold">{{ safetyStatus ? '已签到' : '未签到' }}</span>
@@ -35,30 +35,29 @@
         </div>
       </div>
     </div>
-    <div class="bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl p-6 text-white">
-      <div class="flex items-center justify-center gap-2 mb-3">
-        <PhoneIcon class="w-10 h-10" />
+
+    <div class="bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl p-4 text-white">
+      <div class="flex items-center justify-center gap-2 mb-2">
+        <PhoneIcon class="w-7 h-7" />
         <div class="relative">
-          <QuestionMarkCircleIcon @click="showHelp = true" class="w-8 h-8 cursor-pointer hover:text-orange-200 transition-colors" />
-          <div v-if="showHelp" @click="showHelp = false" class="absolute right-0 top-6 w-64 bg-white text-gray-800 rounded-xl shadow-lg p-4 z-50">
-            <h4 class="font-bold text-sm mb-2">语音小助手功能</h4>
-            <ul class="text-xs text-gray-600 space-y-1">
+          <QuestionMarkCircleIcon @click="showHelp = true" class="w-6 h-6 cursor-pointer hover:text-orange-200 transition-colors" />
+          <div v-if="showHelp" @click="showHelp = false" class="absolute right-0 top-5 w-56 bg-white text-gray-800 rounded-lg shadow-lg p-3 z-50">
+            <h4 class="font-bold text-xs mb-1">语音小助手功能</h4>
+            <ul class="text-xs text-gray-600 space-y-0.5">
               <li>• 通过语音指令控制应用</li>
               <li>• 说"打开回忆录"查看故事</li>
               <li>• 说"记录饮食"添加餐食</li>
               <li>• 说"我不舒服"寻求帮助</li>
-              <li>• 紧急情况下语音求助家人</li>
             </ul>
-            <div class="absolute -top-2 right-4 w-4 h-4 bg-white rotate-45"></div>
+            <div class="absolute -top-1.5 right-3 w-3 h-3 bg-white rotate-45"></div>
           </div>
         </div>
       </div>
-      <h3 class="text-xl font-bold mb-2 text-center">这里有个小助手</h3>
-      <p class="text-orange-100 text-center">点击下方按钮开启语音求助</p>
-      <button @click="handleVoiceClick" class="mt-4 bg-white text-orange-500 px-6 py-2 rounded-full font-bold hover:bg-orange-50 transition-colors block mx-auto">
+      <h3 class="text-lg font-bold text-center">语音小助手</h3>
+      <button @click="handleVoiceClick" class="mt-3 bg-white text-orange-500 px-5 py-2 rounded-full font-bold text-sm hover:bg-orange-50 transition-colors block mx-auto">
         {{ isListening ? '停止收听' : '开始语音' }}
       </button>
-      <p v-if="recognizedText" class="mt-4 bg-white/20 rounded-lg p-3 text-left">{{ recognizedText }}</p>
+      <p v-if="recognizedText" class="mt-3 bg-white/20 rounded-lg p-2 text-xs text-left">{{ recognizedText }}</p>
     </div>
   </div>
 </template>
@@ -114,12 +113,11 @@ const featureCards = [
   { icon: 'CalendarDays', title: '日程提醒', desc: '重要日期提醒', route: '/schedule', color: 'text-indigo-500', bgColor: 'bg-indigo-100' },
   { icon: 'AlertTriangle', title: '紧急求助', desc: '一键求助家人', route: '/sos', color: 'text-amber-500', bgColor: 'bg-amber-100' }
 ]
+
 const goToPage = (route) => {
   router.push(route)
 }
-const goToChild = () => {
-  router.push('/child')
-}
+
 const handleVoiceClick = () => {
   if (isListening.value) {
     isListening.value = false
