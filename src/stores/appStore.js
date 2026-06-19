@@ -21,7 +21,8 @@ export const useAppStore = defineStore('app', {
     sosRecords: [],
     scheduleRecords: [],
     userProfile: {},
-    appSettings: {}
+    appSettings: {},
+    realNameInfo: {}
   }),
   actions: {
     generateInviteCode() {
@@ -247,6 +248,35 @@ export const useAppStore = defineStore('app', {
         this.appSettings = JSON.parse(data)
       }
     },
+    saveRealNameInfo(info) {
+      this.realNameInfo = { ...info }
+      this.userProfile = {
+        ...this.userProfile,
+        realName: info.realName,
+        idCard: info.idCard,
+        gender: info.gender,
+        birthDate: info.birthDate,
+        emergencyContact: info.emergencyContact,
+        emergencyPhone: info.emergencyPhone,
+        address: info.address,
+        healthConditions: info.healthConditions
+      }
+      localStorage.setItem('sunsetai_realname_info', JSON.stringify(this.realNameInfo))
+      localStorage.setItem('sunsetai_user_profile', JSON.stringify(this.userProfile))
+    },
+    loadRealNameInfo() {
+      const data = localStorage.getItem('sunsetai_realname_info')
+      if (data) {
+        this.realNameInfo = JSON.parse(data)
+      }
+    },
+    updateUsername(username) {
+      this.userProfile = {
+        ...this.userProfile,
+        username: username
+      }
+      localStorage.setItem('sunsetai_user_profile', JSON.stringify(this.userProfile))
+    },
     clearAllData() {
       localStorage.removeItem('sunsetai_invite_code')
       localStorage.removeItem('sunsetai_connected_parents')
@@ -264,6 +294,7 @@ export const useAppStore = defineStore('app', {
       localStorage.removeItem('sunsetai_schedule_records')
       localStorage.removeItem('sunsetai_user_profile')
       localStorage.removeItem('sunsetai_app_settings')
+      localStorage.removeItem('sunsetai_realname_info')
       this.inviteCode = ''
       this.connectedParents = []
       this.healthRecords = []

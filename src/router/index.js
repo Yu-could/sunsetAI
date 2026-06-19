@@ -12,6 +12,11 @@ const routes = [
     component: () => import('../views/Login.vue')
   },
   {
+    path: '/realname',
+    name: 'RealName',
+    component: () => import('../views/RealName.vue')
+  },
+  {
     path: '/parent',
     name: 'Home',
     component: () => import('../views/Home.vue')
@@ -139,7 +144,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const publicPaths = ['/', '/login']
+  const publicPaths = ['/', '/login', '/realname']
   const isPublicPath = publicPaths.includes(to.path)
   const loginStatus = JSON.parse(localStorage.getItem('sunsetai_login_status') || '{}')
 

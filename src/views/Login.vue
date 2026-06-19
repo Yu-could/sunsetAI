@@ -311,7 +311,7 @@ const handleRegister = () => {
     }
   }
 
-  alert('注册成功！')
+  alert('注册成功！请完善实名信息')
   
   store.setLoginStatus({
     isLoggedIn: true,
@@ -320,19 +320,7 @@ const handleRegister = () => {
     isAdmin: false
   })
 
-  const routes = {
-    'parent-mobile': '/parent',
-    'parent-desktop': '/desktop',
-    'child-mobile': '/child',
-    'child-desktop': '/desktop/child'
-  }
-
-  const targetRoute = routes[role.value]
-  if (targetRoute) {
-    router.push(targetRoute)
-  } else {
-    router.push('/')
-  }
+  router.push('/realname?role=' + role.value)
 }
 </script>
 
