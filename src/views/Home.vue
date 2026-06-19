@@ -44,37 +44,42 @@
           <div v-if="showHelp" @click="showHelp = false" class="absolute right-0 top-5 w-56 bg-white text-gray-800 rounded-lg shadow-lg p-3 z-50">
             <h4 class="font-bold text-xs mb-1">语音小助手功能</h4>
             <ul class="text-xs text-gray-600 space-y-0.5">
-              <li>• 通过语音指令控制应用</li>
-              <li>• 说"打开回忆录"查看故事</li>
-              <li>• 说"记录饮食"添加餐食</li>
+              <li>• 说"打开健康"查看健康数据</li>
+              <li>• 说"打开用药"查看用药提醒</li>
+              <li>• 说"打开回忆"查看回忆录</li>
               <li>• 说"我不舒服"寻求帮助</li>
+              <li>• 说"签到"完成平安签到</li>
             </ul>
             <div class="absolute -top-1.5 right-3 w-3 h-3 bg-white rotate-45"></div>
           </div>
         </div>
       </div>
       <h3 class="text-lg font-bold text-center">语音小助手</h3>
-      <button @click="handleVoiceClick" class="mt-3 bg-white text-orange-500 px-5 py-2 rounded-full font-bold text-sm hover:bg-orange-50 transition-colors block mx-auto">
-        {{ isListening ? '停止收听' : '开始语音' }}
+      <button @click="handleVoiceClick" :disabled="isSpeaking" class="mt-3 bg-white text-orange-500 px-5 py-2 rounded-full font-bold text-sm hover:bg-orange-50 transition-colors block mx-auto disabled:opacity-70">
+        {{ isListening ? '停止收听' : (isSpeaking ? '正在说话...' : '开始语音') }}
       </button>
       <p v-if="recognizedText" class="mt-3 bg-white/20 rounded-lg p-2 text-xs text-left">{{ recognizedText }}</p>
+      <p v-if="!voiceSupported" class="mt-3 bg-white/20 rounded-lg p-2 text-xs text-center">您的浏览器不支持语音识别</p>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '../stores/appStore'
 import { HeartIcon, DeviceTabletIcon, BookOpenIcon, ReceiptPercentIcon, CheckCircleIcon, UsersIcon, CalendarDaysIcon, ExclamationTriangleIcon, PhoneIcon, QuestionMarkCircleIcon } from '@heroicons/vue/24/solid'
+import { voiceAssistant } from '../utils/voiceAssistant'
 
 const router = useRouter()
 const store = useAppStore()
 
 const today = new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' })
 const isListening = ref(false)
+const isSpeaking = ref(false)
 const recognizedText = ref('')
 const showHelp = ref(false)
+const voiceSupported = ref(true)
 
 const safetyStatus = computed(() => {
   const todayStr = new Date().toDateString()
@@ -114,26 +119,131 @@ const featureCards = [
   { icon: 'AlertTriangle', title: '紧急求助', desc: '一键求助家人', route: '/sos', color: 'text-amber-500', bgColor: 'bg-amber-100' }
 ]
 
-const goToPage = (route) => {
-  router.push(route)
+const voiceCommands = {
+  '健康': '/health',
+  '打开健康': '/health',
+  '查看健康': '/health',
+  '健康监测': '/health',
+  '用药': '/medicine',
+  '打开用药': '/medicine',
+  '吃药': '/medicine',
+  '药': '/medicine',
+  '回忆': '/memories',
+  '打开回忆': '/memories',
+  '回忆录': '/memories',
+  '故事': '/memories',
+  '饮食': '/diet',
+  '打开饮食': '/diet',
+  '吃饭': '/diet',
+  '吃什么': '/diet',
+  '签到': '/safety',
+  '平安签到': '/safety',
+  '安全': '/safety',
+  '家人': '/family',
+  '亲情': '/family',
+  '子女': '/family',
+  '连接': '/family',
+  '日程': '/schedule',
+  '日历': '/schedule',
+  '提醒': '/schedule',
+  '求助': '/sos',
+  '紧急': '/sos',
+  '救命': '/sos',
+  '不舒服': '/sos',
+  '难受': '/sos'
+}
+
+const handleVoiceResult = (text) => {
+  recognizedText.value = `您说：${text}`
+
+  for (const [command, route] of Object.entries(voiceCommands)) {
+    if (text.includes(command)) {
+      isSpeaking.value = true
+      const responses = {
+        '/health': '好的，为您打开健康监测页面',
+        '/medicine': '好的，为您打开用药提醒页面',
+        '/memories': '好的，为您打开回忆录页面',
+        '/diet': '好的，为您打开饮食管理页面',
+        '/safety': '好的，为您打开平安签到页面',
+        '/family': '好的，为您打开亲情连接页面',
+        '/schedule': '好的，为您打开日程提醒页面',
+        '/sos': '别担心，我马上帮您联系家人'
+      }
+      const response = responses[route] || `好的，为您打开${command}页面`
+      voiceAssistant.speak(response)
+      setTimeout(() => {
+        router.push(route)
+        isSpeaking.value = false
+      }, 1500)
+      return
+    }
+  }
+
+  isSpeaking.value = true
+  voiceAssistant.speak('抱歉，我没有听懂，请再说一遍。您可以说打开健康、打开用药、打开回忆录等指令。')
+  setTimeout(() => {
+    isSpeaking.value = false
+  }, 3000)
+}
+
+const handleVoiceEvent = (event, data) => {
+  switch (event) {
+    case 'start':
+      isListening.value = true
+      recognizedText.value = '正在听您说话，请讲...'
+      break
+    case 'result':
+      handleVoiceResult(data)
+      break
+    case 'error':
+      isListening.value = false
+      if (data === 'browser-not-supported') {
+        voiceSupported.value = false
+        recognizedText.value = '您的浏览器不支持语音识别'
+      } else {
+        recognizedText.value = `语音识别出错：${data}`
+      }
+      break
+    case 'end':
+      isListening.value = false
+      break
+    case 'speak-end':
+    case 'speak-error':
+      isSpeaking.value = false
+      break
+  }
 }
 
 const handleVoiceClick = () => {
   if (isListening.value) {
-    isListening.value = false
+    voiceAssistant.stopListening()
     recognizedText.value = '已停止收听'
   } else {
-    isListening.value = true
-    recognizedText.value = '正在收听...'
-    setTimeout(() => {
-      isListening.value = false
-      recognizedText.value = '好的！你说要看什么功能？'
-    }, 3000)
+    if (!voiceAssistant.isSupported()) {
+      voiceSupported.value = false
+      recognizedText.value = '您的浏览器不支持语音识别，请使用Chrome浏览器'
+      return
+    }
+    voiceAssistant.startListening()
   }
+}
+
+const goToPage = (route) => {
+  router.push(route)
 }
 
 onMounted(() => {
   store.loadSignInRecords()
   store.loadDietRecords()
+  voiceAssistant.addCallback(handleVoiceEvent)
+  
+  if (!voiceAssistant.isSupported()) {
+    voiceSupported.value = false
+  }
+})
+
+onUnmounted(() => {
+  voiceAssistant.removeCallback(handleVoiceEvent)
+  voiceAssistant.stopListening()
 })
 </script>
