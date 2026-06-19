@@ -1,9 +1,15 @@
 <template>
-  <div class="px-4 py-4 max-w-md mx-auto">
-    <header class="text-center mb-4">
-      <h1 class="text-2xl font-bold text-primary">夕阳智语</h1>
-      <p class="text-gray-500 text-sm mt-1">SunsetAI</p>
-    </header>
+  <div class="px-4 py-4 max-w-md mx-auto pb-24">
+    <div class="bg-gradient-to-br from-parent to-parent-hover rounded-2xl p-4 text-white mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <p class="text-orange-100 text-sm">{{ greeting }}</p>
+          <h1 class="text-2xl font-bold">夕阳智语</h1>
+        </div>
+        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">👵</div>
+      </div>
+      <p class="text-orange-100 text-xs">SunsetAI - 您的智能健康伴侣</p>
+    </div>
 
     <div class="grid grid-cols-2 gap-3 mb-4">
       <div v-for="card in featureCards" :key="card.title" @click="goToPage(card.route)" class="bg-white rounded-xl shadow-sm p-3 text-center hover:shadow-md transition-all cursor-pointer active:scale-95">
@@ -20,18 +26,96 @@
         <h2 class="text-lg font-bold text-gray-800">今日状态</h2>
         <span class="text-xs text-gray-400">{{ today }}</span>
       </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="bg-green-50 rounded-lg p-3 text-center">
+          <div class="flex items-center justify-center gap-1 mb-1">
+            <CheckCircleIcon class="w-5 h-5 text-green-500" />
+            <span class="text-sm text-gray-600">签到</span>
+          </div>
+          <span :class="safetyStatus ? 'text-green-600' : 'text-gray-400'" class="text-xl font-bold">{{ safetyStatus ? '已完成' : '未签到' }}</span>
+          <button v-if="!safetyStatus" @click="handleSignIn" class="mt-2 text-xs bg-green-500 text-white px-3 py-1 rounded-full">立即签到</button>
+        </div>
+        <div class="bg-blue-50 rounded-lg p-3 text-center">
+          <div class="flex items-center justify-center gap-1 mb-1">
+            <HeartIcon class="w-5 h-5 text-blue-500" />
+            <span class="text-sm text-gray-600">记录次数</span>
+          </div>
+          <span class="text-xl font-bold text-blue-600">{{ todayRecords }}</span>
+          <p class="text-xs text-gray-500 mt-1">健康数据记录</p>
+        </div>
+        <div class="bg-purple-50 rounded-lg p-3 text-center">
+          <div class="flex items-center justify-center gap-1 mb-1">
+            <DeviceTabletIcon class="w-5 h-5 text-purple-500" />
+            <span class="text-sm text-gray-600">用药提醒</span>
+          </div>
+          <span class="text-xl font-bold text-purple-600">{{ pendingMedicine }}</span>
+          <p class="text-xs text-gray-500 mt-1">待服药次数</p>
+        </div>
+        <div class="bg-orange-50 rounded-lg p-3 text-center">
+          <div class="flex items-center justify-center gap-1 mb-1">
+            <UsersIcon class="w-5 h-5 text-orange-500" />
+            <span class="text-sm text-gray-600">亲情连接</span>
+          </div>
+          <span class="text-xl font-bold text-orange-600">{{ connectedChildren }}</span>
+          <p class="text-xs text-gray-500 mt-1">已连接子女</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold text-gray-800">今日用药</h2>
+        <button @click="goToPage('/medicine')" class="text-xs text-parent hover:text-parent-hover">查看全部</button>
+      </div>
+      <div v-if="todayMedicines.length > 0" class="space-y-2">
+        <div v-for="(med, index) in todayMedicines" :key="index" class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">💊</div>
+            <div>
+              <p class="text-sm font-medium text-gray-800">{{ med.name }}</p>
+              <p class="text-xs text-gray-500">{{ med.dose }}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-sm font-bold" :class="med.taken ? 'text-green-500' : 'text-gray-400'">{{ med.time }}</p>
+            <span v-if="med.taken" class="text-xs text-green-500">已服用</span>
+            <span v-else class="text-xs text-amber-500">待服用</span>
+          </div>
+        </div>
+      </div>
+      <div v-else class="text-center py-4 text-gray-400 text-sm">
+        今日暂无用药计划
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold text-gray-800">健康小贴士</h2>
+        <button @click="refreshTip" class="text-xs text-parent hover:text-parent-hover">换一个</button>
+      </div>
+      <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3">
+        <div class="flex items-start gap-2">
+          <span class="text-xl">🌿</span>
+          <div>
+            <p class="text-sm font-medium text-gray-800">{{ currentTip.title }}</p>
+            <p class="text-xs text-gray-600 mt-1">{{ currentTip.content }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm p-4 mb-4">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-lg font-bold text-gray-800">最近活动</h2>
+        <button @click="goToPage('/safety')" class="text-xs text-parent hover:text-parent-hover">查看更多</button>
+      </div>
       <div class="space-y-2">
-        <div class="flex items-center justify-between py-2 border-b border-gray-100">
-          <span class="text-gray-600">签到状态</span>
-          <span :class="safetyStatus ? 'text-green-500' : 'text-red-500'" class="font-bold">{{ safetyStatus ? '已签到' : '未签到' }}</span>
-        </div>
-        <div class="flex items-center justify-between py-2 border-b border-gray-100">
-          <span class="text-gray-600">记录次数</span>
-          <span class="text-gray-800 font-bold">{{ todayRecords }}</span>
-        </div>
-        <div class="flex items-center justify-between py-2">
-          <span class="text-gray-600">身心健康</span>
-          <span class="text-gray-800 font-bold">良好</span>
+        <div v-for="(activity, index) in recentActivities" :key="index" class="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0">
+          <span class="text-lg">{{ activity.icon }}</span>
+          <div class="flex-1">
+            <p class="text-sm text-gray-800">{{ activity.text }}</p>
+            <p class="text-xs text-gray-400">{{ activity.time }}</p>
+          </div>
         </div>
       </div>
     </div>
@@ -81,6 +165,17 @@ const recognizedText = ref('')
 const showHelp = ref(false)
 const voiceSupported = ref(true)
 
+const hour = new Date().getHours()
+const greeting = computed(() => {
+  if (hour < 6) return '夜深了，注意休息'
+  if (hour < 9) return '早上好'
+  if (hour < 12) return '上午好'
+  if (hour < 14) return '中午好'
+  if (hour < 18) return '下午好'
+  if (hour < 22) return '晚上好'
+  return '夜深了，注意休息'
+})
+
 const safetyStatus = computed(() => {
   const todayStr = new Date().toDateString()
   return store.signInRecords.some(record => {
@@ -94,8 +189,51 @@ const todayRecords = computed(() => {
     return new Date(record.timestamp).toDateString() === todayStr
   }).length + store.dietRecords.filter(record => {
     return new Date(record.timestamp).toDateString() === todayStr
+  }).length + store.healthRecords.filter(record => {
+    return new Date(record.timestamp).toDateString() === todayStr
   }).length
 })
+
+const pendingMedicine = computed(() => {
+  return store.medicineRecords.filter(m => !m.takenToday).length
+})
+
+const connectedChildren = computed(() => {
+  return store.connectedChildren.length || 0
+})
+
+const healthTips = [
+  { title: '多喝水', content: '每天建议喝1500-2000毫升水，可以帮助身体代谢，促进健康。' },
+  { title: '适当运动', content: '每天进行30分钟的散步或太极拳，有助于保持身体活力。' },
+  { title: '按时吃药', content: '请按时服用医生开的药物，不要随意增减剂量。' },
+  { title: '保持心情', content: '保持愉快的心情对身体健康很重要，多和家人朋友聊天。' },
+  { title: '注意饮食', content: '饮食要清淡，多吃蔬菜水果，少吃油腻和辛辣食物。' },
+  { title: '定期体检', content: '建议每年进行一次全面体检，及时发现健康问题。' },
+  { title: '充足睡眠', content: '每天保证7-8小时的睡眠，有助于身体恢复和免疫力提升。' },
+  { title: '晒太阳', content: '每天适当晒太阳可以帮助身体合成维生素D，促进钙吸收。' }
+]
+
+const currentTip = ref(healthTips[0])
+
+const refreshTip = () => {
+  const randomIndex = Math.floor(Math.random() * healthTips.length)
+  currentTip.value = healthTips[randomIndex]
+}
+
+const todayMedicines = computed(() => {
+  return [
+    { name: '降压药', dose: '1粒/次', time: '08:00', taken: true },
+    { name: '钙片', dose: '1粒/次', time: '12:00', taken: false },
+    { name: '维生素', dose: '1粒/次', time: '20:00', taken: false }
+  ]
+})
+
+const recentActivities = computed(() => [
+  { icon: '✅', text: '完成今日签到', time: '今天 08:30' },
+  { icon: '❤️', text: '记录血压数据', time: '今天 09:00' },
+  { icon: '💊', text: '服用降压药', time: '今天 08:00' },
+  { icon: '📖', text: '添加回忆录', time: '昨天 15:20' }
+])
 
 const iconComponents = {
   Heart: HeartIcon,
@@ -153,8 +291,23 @@ const voiceCommands = {
   '难受': '/sos'
 }
 
+const handleSignIn = () => {
+  store.addSignInRecord({ type: 'manual' })
+  alert('签到成功！')
+}
+
 const handleVoiceResult = (text) => {
   recognizedText.value = `您说：${text}`
+
+  if (text.includes('签到')) {
+    handleSignIn()
+    isSpeaking.value = true
+    voiceAssistant.speak('签到成功')
+    setTimeout(() => {
+      isSpeaking.value = false
+    }, 1500)
+    return
+  }
 
   for (const [command, route] of Object.entries(voiceCommands)) {
     if (text.includes(command)) {
@@ -235,6 +388,8 @@ const goToPage = (route) => {
 onMounted(() => {
   store.loadSignInRecords()
   store.loadDietRecords()
+  store.loadMedicineRecords()
+  store.loadConnectedChildren()
   voiceAssistant.addCallback(handleVoiceEvent)
   
   if (!voiceAssistant.isSupported()) {
