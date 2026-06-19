@@ -25,7 +25,10 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { HomeIcon, HeartIcon, DeviceTabletIcon, ExclamationTriangleIcon, CogIcon, ChatBubbleLeftIcon, LinkIcon } from '@heroicons/vue/24/solid'
+
+const route = useRoute()
 
 const iconComponents = {
   Home: HomeIcon,
@@ -38,11 +41,11 @@ const iconComponents = {
 }
 
 const isDesktop = computed(() => {
-  return window.location.pathname.startsWith('/desktop')
+  return route.path.startsWith('/desktop')
 })
 
 const isEntry = computed(() => {
-  return window.location.pathname === '/'
+  return route.path === '/'
 })
 
 const parentNavItems = [
