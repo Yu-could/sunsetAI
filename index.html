@@ -8,24 +8,12 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    /* 全局字体大小 - 在页面加载前应用 */
+    /* 全局字体大小 - 通过修改根元素让 Tailwind 的 rem 单位自动响应 */
     html { font-size: 16px; }
     html.font-small { font-size: 14px; }
     html.font-medium { font-size: 16px; }
     html.font-large { font-size: 18px; }
     html.font-xlarge { font-size: 22px; }
-    
-    /* 强制所有元素继承字体大小 */
-    body, body * { font-size: inherit !important; }
-    
-    /* 保留 Tailwind 的相对大小 */
-    body .text-xs { font-size: 0.75rem !important; }
-    body .text-sm { font-size: 0.875rem !important; }
-    body .text-base { font-size: 1rem !important; }
-    body .text-lg { font-size: 1.125rem !important; }
-    body .text-xl { font-size: 1.25rem !important; }
-    body .text-2xl { font-size: 1.5rem !important; }
-    body .text-3xl { font-size: 1.875rem !important; }
   </style>
   <script>
     // 在页面加载前读取字体设置

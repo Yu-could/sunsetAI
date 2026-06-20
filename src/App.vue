@@ -85,24 +85,6 @@ onMounted(() => {
 })
 </script>
 
-<style>
-/* 全局字体大小控制 */
-.font-size-wrapper[data-font-size="small"] { font-size: 14px !important; }
-.font-size-wrapper[data-font-size="medium"] { font-size: 16px !important; }
-.font-size-wrapper[data-font-size="large"] { font-size: 18px !important; }
-.font-size-wrapper[data-font-size="xlarge"] { font-size: 22px !important; }
-
-/* 强制应用字体大小到所有子元素 */
-.font-size-wrapper[data-font-size="small"] * { font-size: inherit !important; }
-.font-size-wrapper[data-font-size="medium"] * { font-size: inherit !important; }
-.font-size-wrapper[data-font-size="large"] * { font-size: inherit !important; }
-.font-size-wrapper[data-font-size="xlarge"] * { font-size: inherit !important; }
-
-/* 导航标签字体 */
-.nav-label { font-size: 0.875rem; font-weight: 500; }
-.font-size-wrapper[data-font-size="xlarge"] .nav-label { font-size: 1rem !important; }
-</style>
-
 <style scoped>
 .active { color: #d35400; }
 </style>
