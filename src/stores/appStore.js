@@ -256,10 +256,19 @@ export const useAppStore = defineStore('app', {
         idCard: info.idCard,
         gender: info.gender,
         birthDate: info.birthDate,
+        age: info.age,
+        bloodType: info.bloodType,
+        allergy: info.allergy,
+        height: info.height,
+        weight: info.weight,
+        medicationNote: info.medicationNote,
+        healthConditions: info.healthConditions,
         emergencyContact: info.emergencyContact,
         emergencyPhone: info.emergencyPhone,
+        emergencyRelation: info.emergencyRelation,
         address: info.address,
-        healthConditions: info.healthConditions
+        livingStatus: info.livingStatus,
+        avatar: info.avatar
       }
       localStorage.setItem('sunsetai_realname_info', JSON.stringify(this.realNameInfo))
       localStorage.setItem('sunsetai_user_profile', JSON.stringify(this.userProfile))

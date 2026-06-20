@@ -1,7 +1,9 @@
 <template>
   <div class="px-4 py-6 max-w-md mx-auto pb-24">
     <header class="mb-6">
-      <h1 class="text-2xl font-bold text-gray-800 mb-2">⚙️ 个人设置</h1>
+      <h1 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+        <AppIcon name="settings" size="lg" class="text-gray-500" /> 个人设置
+      </h1>
       <p class="text-gray-500">管理个人信息和应用设置</p>
     </header>
 
@@ -78,6 +80,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '../stores/appStore'
+import AppIcon from '../components/AppIcon.vue'
 
 const router = useRouter()
 const store = useAppStore()

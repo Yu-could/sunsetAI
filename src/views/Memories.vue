@@ -1,7 +1,9 @@
 <template>
   <div class="px-4 py-6 max-w-md mx-auto">
     <header class="mb-6">
-      <h1 class="text-2xl font-bold text-gray-800 mb-2">📖 回忆录</h1>
+      <h1 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+        <AppIcon name="memories" size="lg" class="text-blue-500" /> 回忆录
+      </h1>
       <p class="text-gray-500">语音记录人生故事，AI帮你整理</p>
     </header>
     <button @click="startRecording" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-white rounded-xl p-6 mb-6 flex items-center justify-center gap-3 hover:shadow-lg transition-shadow">
@@ -37,6 +39,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useAppStore } from '../stores/appStore'
+import AppIcon from '../components/AppIcon.vue'
 
 const store = useAppStore()
 const isRecording = ref(false)

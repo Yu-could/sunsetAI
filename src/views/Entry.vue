@@ -4,32 +4,35 @@
       <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-parent to-child"></div>
       
       <div class="brand-section text-center mb-5">
-        <div class="logo-container w-20 h-20 mx-auto mb-4 rounded-full bg-white p-2 shadow-[0_4px_12px_rgba(0,0,0,0.1)]">
-          <img src="/logo.png?v=20260620-1430" alt="夕阳智语" class="w-full h-full object-contain">
-        </div>
+        <img src="/logo.png?v=20260620-1518" alt="夕阳智语" class="w-20 h-20 mx-auto mb-4 rounded-full object-cover">
         <h1 class="brand-title text-3xl font-bold text-text mb-1">夕阳智语</h1>
         <p class="brand-subtitle text-sm text-text-muted">SunsetAI - AI语音助老助手</p>
       </div>
 
       <div class="device-badge text-center mb-4">
-        <span :class="['inline-block px-4 py-2 rounded-full text-sm font-medium', isMobile ? 'bg-child-bg text-[#1a5276]' : 'bg-parent-bg text-[#8b6914]']">
-          {{ isMobile ? '📱 移动端' : '🖥️ 桌面端' }}
+        <span :class="['inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium', isMobile ? 'bg-child-bg text-child' : 'bg-parent-bg text-parent']">
+          <AppIcon :name="isMobile ? 'mobile' : 'globe'" size="sm" />
+          {{ isMobile ? '移动端' : '桌面端' }}
         </span>
       </div>
 
       <p class="guide-text text-center text-xl font-semibold text-text mb-6">您是长辈还是子女？</p>
-      
+
       <div class="options-list flex flex-col gap-4">
-        <button @click="selectRole('parent')" class="option-btn parent w-full border-2 border-parent rounded-xl p-6 bg-card cursor-pointer flex items-center gap-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(212,165,116,0.15)]">
-          <div class="option-icon w-14 h-14 rounded-lg flex items-center justify-center text-4xl bg-parent-bg">👴</div>
+        <button @click="selectRole('parent')" class="option-btn parent w-full border-2 border-parent rounded-xl p-6 bg-card cursor-pointer flex items-center gap-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(232,132,60,0.15)]">
+          <div class="option-icon w-14 h-14 rounded-lg flex items-center justify-center bg-parent-bg">
+            <AppIcon name="parent" size="2xl" class="text-parent" />
+          </div>
           <div>
             <div class="option-label text-2xl font-bold text-text">我是父母</div>
             <div class="option-desc text-sm text-text-muted">我是长辈，想使用助老服务</div>
           </div>
         </button>
-        
-        <button @click="selectRole('child')" class="option-btn child w-full border-2 border-child rounded-xl p-6 bg-card cursor-pointer flex items-center gap-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(116,165,212,0.15)]">
-          <div class="option-icon w-14 h-14 rounded-lg flex items-center justify-center text-4xl bg-child-bg">👶</div>
+
+        <button @click="selectRole('child')" class="option-btn child w-full border-2 border-child rounded-xl p-6 bg-card cursor-pointer flex items-center gap-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_4px_16px_rgba(91,155,213,0.15)]">
+          <div class="option-icon w-14 h-14 rounded-lg flex items-center justify-center bg-child-bg">
+            <AppIcon name="child_icon" size="2xl" class="text-child" />
+          </div>
           <div>
             <div class="option-label text-2xl font-bold text-text">我是子女</div>
             <div class="option-desc text-sm text-text-muted">我是子女，想关心父母状况</div>
@@ -51,6 +54,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import AppIcon from '../components/AppIcon.vue'
 
 const router = useRouter()
 const isMobile = ref(false)

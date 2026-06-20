@@ -1,23 +1,40 @@
 <template>
   <div class="px-4 py-4 max-w-md mx-auto pb-24">
-    <div class="bg-gradient-to-br from-parent to-parent-hover rounded-2xl p-4 text-white mb-4">
+    <div class="bg-gradient-to-br from-parent to-parent-hover rounded-2xl p-4 text-white mb-4 shadow-md">
       <div class="flex items-center justify-between mb-3">
         <div>
-          <p class="text-orange-100 text-sm">{{ greeting }}</p>
-          <h1 class="text-2xl font-bold">夕阳智语</h1>
+          <p class="text-white/80 text-sm">{{ greeting }}</p>
+          <h1 class="text-2xl font-bold">🌅 夕阳智语</h1>
         </div>
-        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center text-2xl">👵</div>
+        <router-link to="/realname" class="cursor-pointer hover:scale-105 transition-transform">
+          <UserAvatar role="parent" size="lg" />
+        </router-link>
       </div>
-      <p class="text-orange-100 text-xs">SunsetAI - 您的智能健康伴侣</p>
+      <p class="text-white/70 text-xs">SunsetAI — 您的智能语音健康伴侣</p>
     </div>
 
-    <div class="grid grid-cols-2 gap-3 mb-4">
-      <div v-for="card in featureCards" :key="card.title" @click="goToPage(card.route)" class="bg-white rounded-xl shadow-sm p-3 text-center hover:shadow-md transition-all cursor-pointer active:scale-95">
-        <div :class="card.bgColor" class="w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-2">
-          <component :is="iconComponents[card.icon]" :class="card.color" class="w-6 h-6" />
+    <!-- 功能入口 2×3 网格 (6项，不含紧急求助) -->
+    <div class="grid grid-cols-3 gap-2.5 mb-3">
+      <div v-for="card in mainFeatureCards" :key="card.title" @click="goToPage(card.route)" class="bg-white rounded-xl shadow-sm p-3 text-center hover:shadow-md transition-all cursor-pointer active:scale-95">
+        <div :class="card.bgColor" class="w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-1.5">
+          <component :is="iconComponents[card.icon]" :class="card.color" class="w-5 h-5" />
         </div>
-        <h3 class="text-base font-bold text-gray-800">{{ card.title }}</h3>
-        <p class="text-xs text-gray-500 mt-0.5">{{ card.desc }}</p>
+        <h3 class="text-sm font-bold text-gray-800">{{ card.title }}</h3>
+        <p class="text-xs text-gray-400 mt-0.5">{{ card.desc }}</p>
+      </div>
+    </div>
+
+    <!-- 紧急求助 - 独立突出显示 -->
+    <div @click="goToPage('/sos')" class="bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-md p-4 mb-4 text-white cursor-pointer hover:shadow-lg transition-all active:scale-[0.98]">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center flex-shrink-0 animate-pulse-sos-icon">
+          <ExclamationTriangleIcon class="w-7 h-7" />
+        </div>
+        <div class="flex-1">
+          <h3 class="text-lg font-bold">紧急求助</h3>
+          <p class="text-red-100 text-xs">遇到紧急情况？点击这里一键求助家人</p>
+        </div>
+        <span class="text-2xl">›</span>
       </div>
     </div>
 
@@ -70,7 +87,9 @@
       <div v-if="todayMedicines.length > 0" class="space-y-2">
         <div v-for="(med, index) in todayMedicines" :key="index" class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
           <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">💊</div>
+            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+              <AppIcon name="medicine" size="sm" class="text-purple-500" />
+            </div>
             <div>
               <p class="text-sm font-medium text-gray-800">{{ med.name }}</p>
               <p class="text-xs text-gray-500">{{ med.dose }}</p>
@@ -95,7 +114,7 @@
       </div>
       <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3">
         <div class="flex items-start gap-2">
-          <span class="text-xl">🌿</span>
+          <AppIcon name="sparkles" size="lg" class="text-green-500 flex-shrink-0 mt-0.5" />
           <div>
             <p class="text-sm font-medium text-gray-800">{{ currentTip.title }}</p>
             <p class="text-xs text-gray-600 mt-1">{{ currentTip.content }}</p>
@@ -111,7 +130,7 @@
       </div>
       <div class="space-y-2">
         <div v-for="(activity, index) in recentActivities" :key="index" class="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0">
-          <span class="text-lg">{{ activity.icon }}</span>
+          <AppIcon :name="activity.iconName" size="lg" class="text-gray-400 flex-shrink-0" />
           <div class="flex-1">
             <p class="text-sm text-gray-800">{{ activity.text }}</p>
             <p class="text-xs text-gray-400">{{ activity.time }}</p>
@@ -120,15 +139,15 @@
       </div>
     </div>
 
-    <div class="bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl p-4 text-white">
+    <div class="bg-gradient-to-br from-parent to-parent-hover rounded-xl p-4 text-white shadow-md">
       <div class="flex items-center justify-center gap-2 mb-2">
-        <PhoneIcon class="w-7 h-7" />
+        <AppIcon name="microphone" size="lg" class="text-white" />
         <h3 class="text-lg font-bold">语音小助手</h3>
       </div>
       <button @click="showHelp = true" class="text-xs text-white/80 hover:text-white underline mb-3 block text-center">
         点击查看语音指令帮助
       </button>
-      <button @click="handleVoiceClick" :disabled="isSpeaking" class="bg-white text-orange-500 px-5 py-2 rounded-full font-bold text-sm hover:bg-orange-50 transition-colors block mx-auto disabled:opacity-70">
+      <button @click="handleVoiceClick" :disabled="isSpeaking" class="bg-white text-parent px-5 py-2 rounded-full font-bold text-sm hover:bg-parent-light transition-colors block mx-auto disabled:opacity-70 shadow">
         {{ isListening ? '停止收听' : (isSpeaking ? '正在说话...' : '开始语音') }}
       </button>
       <p v-if="recognizedText" class="mt-3 bg-white/20 rounded-lg p-2 text-xs text-left">{{ recognizedText }}</p>
@@ -175,7 +194,7 @@
             </ul>
           </div>
         </div>
-        <button @click="showHelp = false" class="w-full mt-4 bg-orange-500 text-white py-2 rounded-xl font-bold">
+        <button @click="showHelp = false" class="w-full mt-4 bg-parent text-white py-2 rounded-xl font-bold hover:bg-parent-hover transition-colors">
           我知道了
         </button>
       </div>
@@ -187,11 +206,15 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '../stores/appStore'
+import { useToastStore } from '../stores/toastStore'
+import AppIcon from '../components/AppIcon.vue'
+import UserAvatar from '../components/UserAvatar.vue'
 import { HeartIcon, DeviceTabletIcon, BookOpenIcon, ReceiptPercentIcon, CheckCircleIcon, UsersIcon, CalendarDaysIcon, ExclamationTriangleIcon, PhoneIcon, QuestionMarkCircleIcon } from '@heroicons/vue/24/solid'
 import { voiceAssistant } from '../utils/voiceAssistant'
 
 const router = useRouter()
 const store = useAppStore()
+const toast = useToastStore()
 
 const today = new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric', weekday: 'long' })
 const isListening = ref(false)
@@ -256,18 +279,27 @@ const refreshTip = () => {
 }
 
 const todayMedicines = computed(() => {
-  return [
-    { name: '降压药', dose: '1粒/次', time: '08:00', taken: true },
-    { name: '钙片', dose: '1粒/次', time: '12:00', taken: false },
-    { name: '维生素', dose: '1粒/次', time: '20:00', taken: false }
-  ]
+  const meds = store.medicineRecords
+  if (meds.length === 0) {
+    // 默认示例数据，引导用户添加
+    return [
+      { name: '示例：降压药', dose: '1粒/次', time: '08:00', taken: false },
+      { name: '示例：钙片', dose: '1粒/次', time: '12:00', taken: false }
+    ]
+  }
+  return meds.map(m => ({
+    ...m,
+    time: m.time || '08:00',
+    taken: m.takenToday || false,
+    dose: m.dose || '1粒/次'
+  }))
 })
 
 const recentActivities = computed(() => [
-  { icon: '✅', text: '完成今日签到', time: '今天 08:30' },
-  { icon: '❤️', text: '记录血压数据', time: '今天 09:00' },
-  { icon: '💊', text: '服用降压药', time: '今天 08:00' },
-  { icon: '📖', text: '添加回忆录', time: '昨天 15:20' }
+  { iconName: 'signin', text: '完成今日签到', time: '今天 08:30' },
+  { iconName: 'heart', text: '记录血压数据', time: '今天 09:00' },
+  { iconName: 'medicine', text: '服用降压药', time: '今天 08:00' },
+  { iconName: 'memories', text: '添加回忆录', time: '昨天 15:20' }
 ])
 
 const iconComponents = {
@@ -281,15 +313,13 @@ const iconComponents = {
   AlertTriangle: ExclamationTriangleIcon
 }
 
-const featureCards = [
-  { icon: 'Heart', title: '健康监测', desc: '血压血糖心率', route: '/health', color: 'text-red-500', bgColor: 'bg-red-100' },
-  { icon: 'Pill', title: '用药提醒', desc: '定时提醒吃药', route: '/medicine', color: 'text-purple-500', bgColor: 'bg-purple-100' },
-  { icon: 'BookOpen', title: '回忆录', desc: '语音记录人生', route: '/memories', color: 'text-blue-500', bgColor: 'bg-blue-100' },
-  { icon: 'Utensils', title: '饮食管理', desc: '营养评估菜谱', route: '/diet', color: 'text-orange-500', bgColor: 'bg-orange-100' },
-  { icon: 'CheckCircle', title: '平安签到', desc: '自动提醒家人', route: '/safety', color: 'text-green-500', bgColor: 'bg-green-100' },
-  { icon: 'Users', title: '亲情连接', desc: '与子女同步', route: '/family', color: 'text-pink-500', bgColor: 'bg-pink-100' },
-  { icon: 'CalendarDays', title: '日程提醒', desc: '重要日期提醒', route: '/schedule', color: 'text-indigo-500', bgColor: 'bg-indigo-100' },
-  { icon: 'AlertTriangle', title: '紧急求助', desc: '一键求助家人', route: '/sos', color: 'text-amber-500', bgColor: 'bg-amber-100' }
+const mainFeatureCards = [
+  { icon: 'Heart', title: '健康', desc: '监测', route: '/health', color: 'text-red-500', bgColor: 'bg-red-100' },
+  { icon: 'Pill', title: '用药', desc: '提醒', route: '/medicine', color: 'text-purple-500', bgColor: 'bg-purple-100' },
+  { icon: 'BookOpen', title: '回忆', desc: '记录', route: '/memories', color: 'text-blue-500', bgColor: 'bg-blue-100' },
+  { icon: 'Utensils', title: '饮食', desc: '管理', route: '/diet', color: 'text-orange-500', bgColor: 'bg-orange-100' },
+  { icon: 'CheckCircle', title: '签到', desc: '平安', route: '/safety', color: 'text-green-500', bgColor: 'bg-green-100' },
+  { icon: 'Users', title: '家人', desc: '连接', route: '/family', color: 'text-pink-500', bgColor: 'bg-pink-100' }
 ]
 
 const voiceCommands = {
@@ -328,7 +358,7 @@ const voiceCommands = {
 
 const handleSignIn = () => {
   store.addSignInRecord({ type: 'manual' })
-  alert('签到成功！')
+  toast.success('✅ 签到成功！', 2000)
 }
 
 const handleVoiceResult = (text) => {
@@ -425,6 +455,7 @@ onMounted(() => {
   store.loadDietRecords()
   store.loadMedicineRecords()
   store.loadConnectedChildren()
+  store.loadRealNameInfo()
   voiceAssistant.addCallback(handleVoiceEvent)
   
   if (!voiceAssistant.isSupported()) {
@@ -437,3 +468,13 @@ onUnmounted(() => {
   voiceAssistant.stopListening()
 })
 </script>
+
+<style scoped>
+@keyframes pulseSOSIcon {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.animate-pulse-sos-icon {
+  animation: pulseSOSIcon 1.5s infinite;
+}
+</style>

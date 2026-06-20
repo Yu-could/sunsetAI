@@ -1,7 +1,9 @@
 <template>
   <div class="px-4 py-6 max-w-md mx-auto">
     <header class="mb-6">
-      <h1 class="text-2xl font-bold text-gray-800 mb-2">❤️ 健康监测</h1>
+      <h1 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+        <AppIcon name="health" size="lg" class="text-red-500" /> 健康监测
+      </h1>
       <p class="text-gray-500">记录健康数据，关注身体状况</p>
     </header>
 
@@ -127,8 +129,11 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useAppStore } from '../stores/appStore'
+import { useToastStore } from '../stores/toastStore'
+import AppIcon from '../components/AppIcon.vue'
 
 const store = useAppStore()
+const toast = useToastStore()
 
 const showInputModal = ref(false)
 const inputType = ref('')
@@ -187,7 +192,7 @@ const saveHealthData = () => {
   
   if (inputType.value === 'bloodPressure') {
     if (!inputData.value.highPressure || !inputData.value.lowPressure) {
-      alert('请输入完整的血压数据')
+      toast.warning('请输入完整的血压数据', 2500)
       return
     }
     record.highPressure = parseInt(inputData.value.highPressure)
@@ -195,14 +200,14 @@ const saveHealthData = () => {
     record.status = record.highPressure > 140 || record.lowPressure > 90 ? '偏高' : '正常'
   } else if (inputType.value === 'bloodSugar') {
     if (!inputData.value.bloodSugar) {
-      alert('请输入血糖值')
+      toast.warning('请输入血糖值', 2500)
       return
     }
     record.bloodSugar = parseFloat(inputData.value.bloodSugar)
     record.status = record.bloodSugar > 7.0 ? '偏高' : '正常'
   } else if (inputType.value === 'heartRate') {
     if (!inputData.value.heartRate) {
-      alert('请输入心率')
+      toast.warning('请输入心率', 2500)
       return
     }
     record.heartRate = parseInt(inputData.value.heartRate)
@@ -211,7 +216,7 @@ const saveHealthData = () => {
   
   store.addHealthRecord(record)
   showInputModal.value = false
-  alert('健康数据已保存')
+  toast.success('健康数据已保存', 2000)
 }
 
 onMounted(() => {

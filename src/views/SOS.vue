@@ -1,7 +1,9 @@
 <template>
   <div class="px-4 py-6 max-w-md mx-auto">
     <header class="mb-6">
-      <h1 class="text-2xl font-bold text-gray-800 mb-2">🚨 紧急求助</h1>
+      <h1 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+        <AppIcon name="sos" size="lg" class="text-red-500" /> 紧急求助
+      </h1>
       <p class="text-gray-500">一键求助，快速联系家人</p>
     </header>
 
@@ -102,8 +104,11 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useAppStore } from '../stores/appStore'
+import { useToastStore } from '../stores/toastStore'
+import AppIcon from '../components/AppIcon.vue'
 
 const store = useAppStore()
+const toast = useToastStore()
 
 const formatTime = (timestamp) => {
   return new Date(timestamp).toLocaleString('zh-CN', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
@@ -116,21 +121,21 @@ const triggerSOS = () => {
       status: '已发送',
       timestamp: new Date().toISOString()
     })
-    alert('紧急求助已发送！子女将收到通知。')
+    toast.warning('🚨 紧急求助已发送！子女将收到通知。', 4000)
   }
 }
 
 const callChild = (child) => {
-  alert('正在呼叫: ' + (child.name || '子女'))
+  toast.info('📞 正在呼叫: ' + (child.name || '子女'), 2500)
 }
 
 const messageChild = (child) => {
-  alert('发送消息给: ' + (child.name || '子女'))
+  toast.info('💬 发送消息给: ' + (child.name || '子女'), 2500)
 }
 
 const callEmergency = (number) => {
   if (confirm('确认拨打 ' + number + '？')) {
-    alert('正在拨打: ' + number)
+    toast.error('📞 正在拨打: ' + number + '（模拟）', 3000)
   }
 }
 

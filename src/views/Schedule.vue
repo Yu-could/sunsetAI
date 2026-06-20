@@ -1,7 +1,9 @@
 <template>
   <div class="px-4 py-6 max-w-md mx-auto">
     <header class="mb-6">
-      <h1 class="text-2xl font-bold text-gray-800 mb-2">📅 日程提醒</h1>
+      <h1 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+        <AppIcon name="schedule" size="lg" class="text-indigo-500" /> 日程提醒
+      </h1>
       <p class="text-gray-500">重要日期提醒，不错过每个时刻</p>
     </header>
 
@@ -151,6 +153,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useAppStore } from '../stores/appStore'
+import AppIcon from '../components/AppIcon.vue'
 
 const store = useAppStore()
 

@@ -1,13 +1,15 @@
 <template>
   <div class="p-6 max-w-6xl mx-auto">
-    <div class="bg-gradient-to-br from-parent to-parent-hover rounded-2xl p-5 text-white mb-6">
+    <div class="bg-gradient-to-br from-parent to-parent-hover rounded-2xl p-5 text-white mb-6 shadow-md">
       <div class="flex items-center justify-between">
         <div>
-          <p class="text-orange-100 text-sm">{{ greeting }}</p>
-          <h2 class="text-2xl font-bold mt-1">欢迎回来</h2>
-          <p class="text-orange-100 text-xs mt-1">今天是美好的一天，祝您身体健康</p>
+          <p class="text-white/80 text-sm">{{ greeting }}</p>
+          <h2 class="text-2xl font-bold mt-1">🌅 欢迎回来</h2>
+          <p class="text-white/70 text-xs mt-1">今天是美好的一天，祝您身体健康</p>
         </div>
-        <div class="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center text-3xl">👵</div>
+        <router-link to="/realname" class="cursor-pointer hover:scale-105 transition-transform">
+          <UserAvatar role="parent" size="xl" />
+        </router-link>
       </div>
     </div>
 
@@ -19,7 +21,9 @@
             <p class="text-2xl font-bold text-gray-400 mt-1">-</p>
             <p class="text-gray-400 text-xs mt-0.5">等待数据</p>
           </div>
-          <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">❤️</div>
+          <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+            <AppIcon name="heart" size="sm" class="text-red-500" />
+          </div>
         </div>
       </div>
       <div class="bg-white rounded-xl shadow-sm p-4">
@@ -29,7 +33,9 @@
             <p class="text-2xl font-bold text-green-500 mt-1">{{ store.signInRecords.length }}</p>
             <p class="text-gray-400 text-xs mt-0.5">天</p>
           </div>
-          <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">✅</div>
+          <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+            <AppIcon name="signin" size="sm" class="text-green-500" />
+          </div>
         </div>
       </div>
       <div class="bg-white rounded-xl shadow-sm p-4">
@@ -39,7 +45,9 @@
             <p class="text-2xl font-bold text-gray-400 mt-1">-</p>
             <p class="text-gray-400 text-xs mt-0.5">千卡</p>
           </div>
-          <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">🍜</div>
+          <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+            <AppIcon name="diet" size="sm" class="text-orange-500" />
+          </div>
         </div>
       </div>
       <div class="bg-white rounded-xl shadow-sm p-4">
@@ -49,7 +57,9 @@
             <p class="text-2xl font-bold text-blue-500 mt-1">{{ store.connectedChildren.length }}</p>
             <p class="text-gray-400 text-xs mt-0.5">人</p>
           </div>
-          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">👨‍👩‍👧</div>
+          <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+            <AppIcon name="family" size="sm" class="text-blue-500" />
+          </div>
         </div>
       </div>
       <div class="bg-white rounded-xl shadow-sm p-4">
@@ -59,7 +69,9 @@
             <p class="text-2xl font-bold text-purple-500 mt-1">{{ pendingMedicine }}</p>
             <p class="text-gray-400 text-xs mt-0.5">种</p>
           </div>
-          <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">💊</div>
+          <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+            <AppIcon name="medicine" size="sm" class="text-purple-500" />
+          </div>
         </div>
       </div>
       <div class="bg-white rounded-xl shadow-sm p-4">
@@ -69,7 +81,9 @@
             <p class="text-2xl font-bold text-indigo-500 mt-1">{{ store.healthRecords.length }}</p>
             <p class="text-gray-400 text-xs mt-0.5">条</p>
           </div>
-          <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">📊</div>
+          <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+            <AppIcon name="chart" size="sm" class="text-indigo-500" />
+          </div>
         </div>
       </div>
     </div>
@@ -181,7 +195,7 @@
         </div>
         <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-3">
           <div class="flex items-start gap-2">
-            <span class="text-xl">🌿</span>
+            <AppIcon name="sparkles" size="lg" class="text-green-500 flex-shrink-0 mt-0.5" />
             <div>
               <p class="text-sm font-medium text-gray-800">{{ currentTip.title }}</p>
               <p class="text-xs text-gray-600 mt-1">{{ currentTip.content }}</p>
@@ -241,6 +255,8 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '../../stores/appStore'
+import AppIcon from '../../components/AppIcon.vue'
+import UserAvatar from '../../components/UserAvatar.vue'
 
 const router = useRouter()
 const store = useAppStore()
@@ -321,5 +337,6 @@ onMounted(() => {
   store.loadSignInRecords()
   store.loadDietRecords()
   store.loadConnectedChildren()
+  store.loadRealNameInfo()
 })
 </script>

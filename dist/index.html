@@ -3,14 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>夕阳智语 - SunsetAI</title>
+  <title>澶曢槼鏅鸿 - SunsetAI</title>
+  <link rel="icon" type="image/png" href="/git/Git/sunsetAI/logo.png?v=20260620-1315">
+  <link rel="shortcut icon" href="/logo.ico?v=20260620-1315">
+  <link rel="apple-touch-icon" href="/git/Git/sunsetAI/logo.png?v=20260620-1315">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
-  <script type="module" crossorigin src="/assets/index-DWiFYpSR.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-B-TgXHEj.css">
+  <style>
+    /* 鍏ㄥ眬瀛椾綋澶у皬 - 閫氳繃淇敼鏍瑰厓绱犺 Tailwind 鐨?rem 鍗曚綅鑷姩鍝嶅簲 */
+    html { font-size: 16px; }
+    html.font-small { font-size: 14px; }
+    html.font-medium { font-size: 16px; }
+    html.font-large { font-size: 18px; }
+    html.font-xlarge { font-size: 22px; }
+  </style>
+  <script>
+    // 鍦ㄩ〉闈㈠姞杞藉墠璇诲彇瀛椾綋璁剧疆
+    (function() {
+      try {
+        var settings = localStorage.getItem('sunsetai_app_settings');
+        if (settings) {
+          var parsed = JSON.parse(settings);
+          var fontSize = parsed.fontSize || 'medium';
+          document.documentElement.className = 'font-' + fontSize;
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <script type="module" crossorigin src="/git/Git/sunsetAI/assets/index-Cgpna8ts.js"></script>
+  <link rel="stylesheet" crossorigin href="/git/Git/sunsetAI/assets/index-DJmPzkwf.css">
 </head>
 <body>
-  <div id="app"></div>
+  <div id="app"></div>
 </body>
 </html>
+
