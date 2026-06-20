@@ -123,27 +123,62 @@
     <div class="bg-gradient-to-r from-orange-500 to-amber-500 rounded-xl p-4 text-white">
       <div class="flex items-center justify-center gap-2 mb-2">
         <PhoneIcon class="w-7 h-7" />
-        <div class="relative">
-          <QuestionMarkCircleIcon @click="showHelp = true" class="w-6 h-6 cursor-pointer hover:text-orange-200 transition-colors" />
-          <div v-if="showHelp" @click="showHelp = false" class="absolute right-0 top-5 w-56 bg-white text-gray-800 rounded-lg shadow-lg p-3 z-50">
-            <h4 class="font-bold text-xs mb-1">语音小助手功能</h4>
-            <ul class="text-xs text-gray-600 space-y-0.5">
-              <li>• 说"打开健康"查看健康数据</li>
-              <li>• 说"打开用药"查看用药提醒</li>
-              <li>• 说"打开回忆"查看回忆录</li>
-              <li>• 说"我不舒服"寻求帮助</li>
-              <li>• 说"签到"完成平安签到</li>
-            </ul>
-            <div class="absolute -top-1.5 right-3 w-3 h-3 bg-white rotate-45"></div>
-          </div>
-        </div>
+        <h3 class="text-lg font-bold">语音小助手</h3>
       </div>
-      <h3 class="text-lg font-bold text-center">语音小助手</h3>
-      <button @click="handleVoiceClick" :disabled="isSpeaking" class="mt-3 bg-white text-orange-500 px-5 py-2 rounded-full font-bold text-sm hover:bg-orange-50 transition-colors block mx-auto disabled:opacity-70">
+      <button @click="showHelp = true" class="text-xs text-white/80 hover:text-white underline mb-3 block text-center">
+        点击查看语音指令帮助
+      </button>
+      <button @click="handleVoiceClick" :disabled="isSpeaking" class="bg-white text-orange-500 px-5 py-2 rounded-full font-bold text-sm hover:bg-orange-50 transition-colors block mx-auto disabled:opacity-70">
         {{ isListening ? '停止收听' : (isSpeaking ? '正在说话...' : '开始语音') }}
       </button>
       <p v-if="recognizedText" class="mt-3 bg-white/20 rounded-lg p-2 text-xs text-left">{{ recognizedText }}</p>
       <p v-if="!voiceSupported" class="mt-3 bg-white/20 rounded-lg p-2 text-xs text-center">您的浏览器不支持语音识别</p>
+    </div>
+
+    <div v-if="showHelp" class="fixed inset-0 bg-black/50 z-50 flex items-end justify-center" @click.self="showHelp = false">
+      <div class="bg-white w-full max-w-md rounded-t-2xl p-4 animate-slide-up">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-lg font-bold text-gray-800">🎤 语音小助手功能</h4>
+          <button @click="showHelp = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-orange-50 rounded-lg p-3">
+            <p class="text-sm font-bold text-orange-600 mb-1">健康相关</p>
+            <ul class="text-xs text-gray-600 space-y-0.5">
+              <li>• 打开健康</li>
+              <li>• 查看健康数据</li>
+              <li>• 健康监测</li>
+            </ul>
+          </div>
+          <div class="bg-purple-50 rounded-lg p-3">
+            <p class="text-sm font-bold text-purple-600 mb-1">用药相关</p>
+            <ul class="text-xs text-gray-600 space-y-0.5">
+              <li>• 打开用药</li>
+              <li>• 吃药</li>
+              <li>• 用药提醒</li>
+            </ul>
+          </div>
+          <div class="bg-blue-50 rounded-lg p-3">
+            <p class="text-sm font-bold text-blue-600 mb-1">回忆录</p>
+            <ul class="text-xs text-gray-600 space-y-0.5">
+              <li>• 打开回忆</li>
+              <li>• 回忆录</li>
+              <li>• 故事</li>
+            </ul>
+          </div>
+          <div class="bg-green-50 rounded-lg p-3">
+            <p class="text-sm font-bold text-green-600 mb-1">其他功能</p>
+            <ul class="text-xs text-gray-600 space-y-0.5">
+              <li>• 签到</li>
+              <li>• 求助</li>
+              <li>• 打开饮食</li>
+            </ul>
+          </div>
+        </div>
+        <button @click="showHelp = false" class="w-full mt-4 bg-orange-500 text-white py-2 rounded-xl font-bold">
+          我知道了
+        </button>
+      </div>
     </div>
   </div>
 </template>
