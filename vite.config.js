@@ -8,7 +8,7 @@ export default defineConfig({
       '@': '/src'
     }
   },
-  base: './',
+  base: '/sunsetAI/',
   server: {
     host: '0.0.0.0',
     port: 5175
