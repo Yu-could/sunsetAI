@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen">
+  <div class="min-h-screen" :style="appStyle">
     <div v-if="isDesktop">
       <router-view />
     </div>
@@ -24,11 +24,15 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { HomeIcon, HeartIcon, DeviceTabletIcon, ExclamationTriangleIcon, CogIcon, ChatBubbleLeftIcon, LinkIcon } from '@heroicons/vue/24/solid'
+import { useAppStore } from './stores/appStore'
 
 const route = useRoute()
+const store = useAppStore()
+
+const fontSize = ref('medium')
 
 const iconComponents = {
   Home: HomeIcon,
@@ -39,6 +43,16 @@ const iconComponents = {
   MessageCircle: ChatBubbleLeftIcon,
   Link: LinkIcon
 }
+
+const appStyle = computed(() => {
+  const sizes = {
+    small: '14px',
+    medium: '16px',
+    large: '18px',
+    xlarge: '20px'
+  }
+  return { fontSize: sizes[fontSize.value] || '16px' }
+})
 
 const isDesktop = computed(() => {
   return route.path.startsWith('/desktop')
@@ -66,6 +80,13 @@ const childNavItems = [
 
 const currentNavItems = computed(() => {
   return window.location.pathname.startsWith('/child') ? childNavItems : parentNavItems
+})
+
+onMounted(() => {
+  store.loadAppSettings()
+  if (store.appSettings?.fontSize) {
+    fontSize.value = store.appSettings.fontSize
+  }
 })
 </script>
 
