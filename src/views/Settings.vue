@@ -101,6 +101,13 @@ const isVerified = computed(() => !!store.userProfile?.idCard)
 const saveSettings = () => {
   store.saveAppSettings(settings.value)
   
+  // 立即应用字体大小
+  document.documentElement.className = 'font-' + settings.value.fontSize
+  
+  // 提示用户
+  alert('设置已保存，字体大小已更新！')
+  
+  // 跳转到主页（不刷新页面）
   const role = store.loginStatus?.role || ''
   const routes = {
     'parent-mobile': '/parent',
@@ -109,8 +116,7 @@ const saveSettings = () => {
     'child-desktop': '/desktop/child'
   }
   const targetRoute = routes[role] || '/parent'
-  
-  window.location.href = '#' + targetRoute
+  router.push(targetRoute)
 }
 
 const goToRealName = () => {
