@@ -4,7 +4,7 @@
       <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-parent to-child"></div>
       
       <div class="brand-section text-center mb-5">
-        <img src="/LOGO (2).png" alt="夕阳智语" class="logo-wrapper w-16 h-16 rounded-2xl mx-auto mb-3 shadow-[0_4px_12px_rgba(249,115,22,0.3)] object-contain">
+        <img src="/logo.png" alt="夕阳智语" class="logo-wrapper w-16 h-16 rounded-2xl mx-auto mb-3 shadow-[0_4px_12px_rgba(249,115,22,0.3)] object-contain">
         <h1 class="brand-title text-3xl font-bold text-text mb-1">夕阳智语</h1>
         <p class="brand-subtitle text-sm text-text-muted">SunsetAI - AI语音助老助手</p>
       </div>

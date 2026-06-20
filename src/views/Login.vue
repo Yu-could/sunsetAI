@@ -4,7 +4,7 @@
       <div class="absolute top-0 left-0 right-0 h-1" :class="roleColor === 'parent' ? 'bg-gradient-to-r from-parent to-[#e8b88a]' : 'bg-gradient-to-r from-child to-[#a8c5e0]'"></div>
       
       <div class="brand-section text-center mb-5">
-        <img src="/LOGO (2).png" alt="夕阳智语" class="logo-wrapper w-20 h-20 rounded-2xl mx-auto mb-3 shadow-[0_4px_12px_rgba(249,115,22,0.3)] object-contain">
+        <img src="/logo.png" alt="夕阳智语" class="logo-wrapper w-20 h-20 rounded-2xl mx-auto mb-3 shadow-[0_4px_12px_rgba(249,115,22,0.3)] object-contain">
         <h1 class="brand-title text-xl font-bold text-text mb-1">夕阳智语</h1>
         <p :class="['brand-subtitle text-xs', roleColor === 'parent' ? 'text-parent' : 'text-child']">{{ roleTitle }}</p>
       </div>
