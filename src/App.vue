@@ -72,15 +72,30 @@ const currentNavItems = computed(() => {
   return window.location.pathname.startsWith('/child') ? childNavItems : parentNavItems
 })
 
+// 应用字体大小到 DOM
+const applyFontSize = (size) => {
+  document.documentElement.className = 'font-' + size
+}
+
+// 监听路由变化，每次都应用字体设置
+watch(route, () => {
+  store.loadAppSettings()
+  if (store.appSettings?.fontSize) {
+    fontSize.value = store.appSettings.fontSize
+    applyFontSize(fontSize.value)
+  }
+})
+
+// 监听字体大小变化
 watch(fontSize, (newSize) => {
-  document.documentElement.className = 'font-' + newSize
+  applyFontSize(newSize)
 })
 
 onMounted(() => {
   store.loadAppSettings()
   if (store.appSettings?.fontSize) {
     fontSize.value = store.appSettings.fontSize
-    document.documentElement.className = 'font-' + fontSize.value
+    applyFontSize(fontSize.value)
   }
 })
 </script>
