@@ -1,37 +1,11 @@
-<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFF7ED"/>
-      <stop offset="100%" stop-color="#FEF3C7"/>
-    </linearGradient>
-    <linearGradient id="sunGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#F97316"/>
-      <stop offset="100%" stop-color="#EA580C"/>
-    </linearGradient>
-  </defs>
-  
-  <circle cx="100" cy="100" r="95" fill="url(#bgGrad)"/>
-  
-  <circle cx="100" cy="100" r="88" fill="none" stroke="#FED7AA" stroke-width="1" stroke-opacity="0.5"/>
-  
-  <path d="M40 150 Q60 130 100 130 Q140 130 160 150" fill="none" stroke="#4B5563" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M50 165 Q80 155 100 155 Q120 155 150 165" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round"/>
-  
-  <circle cx="100" cy="115" r="22" fill="url(#sunGrad)"/>
-  <ellipse cx="100" cy="118" rx="18" ry="10" fill="#FEF3C7" opacity="0.3"/>
-  
-  <circle cx="75" cy="95" r="18" fill="none" stroke="#4B5563" stroke-width="3"/>
-  <circle cx="100" cy="85" r="22" fill="none" stroke="#4B5563" stroke-width="3"/>
-  <circle cx="125" cy="90" r="20" fill="none" stroke="#4B5563" stroke-width="3"/>
-  
-  <path d="M65 130 Q75 115 95 115" fill="none" stroke="#4B5563" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M85 125 Q100 110 120 110" fill="none" stroke="#4B5563" stroke-width="2.5" stroke-linecap="round"/>
-  <path d="M105 125 Q120 115 135 110" fill="none" stroke="#4B5563" stroke-width="2.5" stroke-linecap="round"/>
-  
-  <path d="M70 118 L72 115 M68 120 L70 117" stroke="#4B5563" stroke-width="2"/>
-  <path d="M100 108 L102 105 M98 110 L100 107" stroke="#4B5563" stroke-width="2"/>
-  <path d="M130 113 L132 110 M128 115 L130 112" stroke="#4B5563" stroke-width="2"/>
-  
-  <text x="100" y="172" text-anchor="middle" font-family="sans-serif" font-size="18" font-weight="bold" fill="#4B5563">SunsetAI</text>
-  <text x="100" y="190" text-anchor="middle" font-family="sans-serif" font-size="11" fill="#9CA3AF">夕阳智语</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <circle cx="60" cy="60" r="58" fill="#FFF7ED"/>
+  <circle cx="60" cy="60" r="55" fill="none" stroke="#FED7AA" stroke-width="1"/>
+  <circle cx="60" cy="75" r="15" fill="#F97316"/>
+  <circle cx="60" cy="72" r="10" fill="#FDBA74"/>
+  <circle cx="42" cy="52" r="12" fill="none" stroke="#4B5563" stroke-width="2"/>
+  <circle cx="60" cy="45" r="14" fill="none" stroke="#4B5563" stroke-width="2"/>
+  <circle cx="78" cy="50" r="13" fill="none" stroke="#4B5563" stroke-width="2"/>
+  <path d="M35 70 Q45 60 60 60 Q75 60 85 70" fill="none" stroke="#4B5563" stroke-width="1.5"/>
+  <path d="M40 85 Q55 78 70 78" fill="none" stroke="#4B5563" stroke-width="1.5"/>
 </svg>
