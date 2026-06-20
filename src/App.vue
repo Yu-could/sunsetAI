@@ -73,26 +73,14 @@ const currentNavItems = computed(() => {
 })
 
 watch(fontSize, (newSize) => {
-  const sizes = {
-    small: '14px',
-    medium: '16px',
-    large: '18px',
-    xlarge: '22px'
-  }
-  document.documentElement.style.fontSize = sizes[newSize] || '16px'
+  document.documentElement.className = 'font-' + newSize
 })
 
 onMounted(() => {
   store.loadAppSettings()
   if (store.appSettings?.fontSize) {
     fontSize.value = store.appSettings.fontSize
-    const sizes = {
-      small: '14px',
-      medium: '16px',
-      large: '18px',
-      xlarge: '22px'
-    }
-    document.documentElement.style.fontSize = sizes[fontSize.value] || '16px'
+    document.documentElement.className = 'font-' + fontSize.value
   }
 })
 </script>
