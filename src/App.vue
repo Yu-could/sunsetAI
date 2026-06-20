@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen" :style="appStyle">
+  <div class="min-h-screen font-size-wrapper" :data-font-size="fontSize">
     <div v-if="isDesktop">
       <router-view />
     </div>
@@ -10,7 +10,7 @@
             <li v-for="item in currentNavItems" :key="item.path">
               <router-link :to="item.path" class="flex flex-col items-center justify-center w-full h-full text-gray-500 hover:text-primary transition-colors" :class="{ active: $route.name === item.name }">
                 <component :is="iconComponents[item.icon]" class="w-6 h-6 mb-1" />
-                <span class="text-sm font-medium">{{ item.label }}</span>
+                <span class="nav-label">{{ item.label }}</span>
               </router-link>
             </li>
           </ul>
@@ -24,7 +24,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { HomeIcon, HeartIcon, DeviceTabletIcon, ExclamationTriangleIcon, CogIcon, ChatBubbleLeftIcon, LinkIcon } from '@heroicons/vue/24/solid'
 import { useAppStore } from './stores/appStore'
@@ -43,16 +43,6 @@ const iconComponents = {
   MessageCircle: ChatBubbleLeftIcon,
   Link: LinkIcon
 }
-
-const appStyle = computed(() => {
-  const sizes = {
-    small: '14px',
-    medium: '16px',
-    large: '18px',
-    xlarge: '20px'
-  }
-  return { fontSize: sizes[fontSize.value] || '16px' }
-})
 
 const isDesktop = computed(() => {
   return route.path.startsWith('/desktop')
@@ -82,13 +72,48 @@ const currentNavItems = computed(() => {
   return window.location.pathname.startsWith('/child') ? childNavItems : parentNavItems
 })
 
+watch(fontSize, (newSize) => {
+  const sizes = {
+    small: '14px',
+    medium: '16px',
+    large: '18px',
+    xlarge: '22px'
+  }
+  document.documentElement.style.fontSize = sizes[newSize] || '16px'
+})
+
 onMounted(() => {
   store.loadAppSettings()
   if (store.appSettings?.fontSize) {
     fontSize.value = store.appSettings.fontSize
+    const sizes = {
+      small: '14px',
+      medium: '16px',
+      large: '18px',
+      xlarge: '22px'
+    }
+    document.documentElement.style.fontSize = sizes[fontSize.value] || '16px'
   }
 })
 </script>
+
+<style>
+/* 全局字体大小控制 */
+.font-size-wrapper[data-font-size="small"] { font-size: 14px !important; }
+.font-size-wrapper[data-font-size="medium"] { font-size: 16px !important; }
+.font-size-wrapper[data-font-size="large"] { font-size: 18px !important; }
+.font-size-wrapper[data-font-size="xlarge"] { font-size: 22px !important; }
+
+/* 强制应用字体大小到所有子元素 */
+.font-size-wrapper[data-font-size="small"] * { font-size: inherit !important; }
+.font-size-wrapper[data-font-size="medium"] * { font-size: inherit !important; }
+.font-size-wrapper[data-font-size="large"] * { font-size: inherit !important; }
+.font-size-wrapper[data-font-size="xlarge"] * { font-size: inherit !important; }
+
+/* 导航标签字体 */
+.nav-label { font-size: 0.875rem; font-weight: 500; }
+.font-size-wrapper[data-font-size="xlarge"] .nav-label { font-size: 1rem !important; }
+</style>
 
 <style scoped>
 .active { color: #d35400; }
