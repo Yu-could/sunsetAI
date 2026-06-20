@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>澶曢槼鏅鸿 - SunsetAI</title>
-  <link rel="icon" type="image/png" href="/logo.png?v=20260620-1315">
-  <link rel="shortcut icon" href="/logo.ico?v=20260620-1315">
-  <link rel="apple-touch-icon" href="/logo.png?v=20260620-1315">
+  <title>夕阳智语 - SunsetAI</title>
+  <link rel="icon" type="image/png" href="/sunsetAI/logo.png?v=20260620-1900">
+  <link rel="shortcut icon" href="/sunsetAI/logo.ico?v=20260620-1900">
+  <link rel="apple-touch-icon" href="/sunsetAI/logo.png?v=20260620-1900">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
   <style>
-    /* 鍏ㄥ眬瀛椾綋澶у皬 - 閫氳繃淇敼鏍瑰厓绱犺 Tailwind 鐨?rem 鍗曚綅鑷姩鍝嶅簲 */
+    /* 全局字体大小 - 通过修改根元素让 Tailwind 的 rem 单位自动响应 */
     html { font-size: 16px; }
     html.font-small { font-size: 14px; }
     html.font-medium { font-size: 16px; }
@@ -19,7 +19,7 @@
     html.font-xlarge { font-size: 22px; }
   </style>
   <script>
-    // 鍦ㄩ〉闈㈠姞杞藉墠璇诲彇瀛椾綋璁剧疆
+    // 在页面加载前读取字体设置
     (function() {
       try {
         var settings = localStorage.getItem('sunsetai_app_settings');
