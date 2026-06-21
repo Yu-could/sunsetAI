@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>夕阳智语 - SunsetAI</title>
+  <link rel="icon" type="image/png" href="/sunsetAI/logo.png?v=20260621-2200">
+  <link rel="shortcut icon" href="./logo.ico?v=20260621-2200">
+  <link rel="apple-touch-icon" href="/sunsetAI/logo.png?v=20260621-2200">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    /* 全局字体大小 - 通过修改根元素让 Tailwind 的 rem 单位自动响应 */
+    html { font-size: 16px; }
+    html.font-small { font-size: 14px; }
+    html.font-medium { font-size: 16px; }
+    html.font-large { font-size: 18px; }
+    html.font-xlarge { font-size: 22px; }
+  </style>
+  <script>
+    // 在页面加载前读取字体设置
+    (function() {
+      try {
+        var settings = localStorage.getItem('sunsetai_app_settings');
+        if (settings) {
+          var parsed = JSON.parse(settings);
+          var fontSize = parsed.fontSize || 'medium';
+          document.documentElement.className = 'font-' + fontSize;
+        }
+      } catch(e) {}
+    })();
+  </script>
+  <script type="module" crossorigin src="/sunsetAI/assets/index-BkF5s2h1.js"></script>
+  <link rel="stylesheet" crossorigin href="/sunsetAI/assets/index-zXZd3wKb.css">
+</head>
+<body>
+  <div id="app"></div>
+</body>
+</html>
+
