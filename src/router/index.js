@@ -112,6 +112,26 @@ const routes = [
     component: () => import('../views/desktop/Family.vue')
   },
   {
+    path: '/desktop/health',
+    name: 'DesktopHealth',
+    component: () => import('../views/Health.vue')
+  },
+  {
+    path: '/desktop/medicine',
+    name: 'DesktopMedicine',
+    component: () => import('../views/Medicine.vue')
+  },
+  {
+    path: '/desktop/schedule',
+    name: 'DesktopSchedule',
+    component: () => import('../views/Schedule.vue')
+  },
+  {
+    path: '/desktop/sos',
+    name: 'DesktopSOS',
+    component: () => import('../views/SOS.vue')
+  },
+  {
     path: '/desktop/child',
     name: 'DesktopChildHome',
     component: () => import('../views/desktop/ChildHome.vue')

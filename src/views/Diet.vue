@@ -1,11 +1,13 @@
 <template>
-  <div class="px-4 py-6 max-w-md mx-auto">
+  <div class="px-4 py-6 max-w-md mx-auto pb-24">
     <header class="mb-6">
       <h1 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
         <AppIcon name="diet" size="lg" class="text-orange-500" /> 饮食管理
       </h1>
-      <p class="text-gray-500">记录三餐，营养评估</p>
+      <p class="text-gray-500">记录三餐，营养评估，菜谱推荐</p>
     </header>
+
+    <!-- 今日饮食记录 -->
     <div class="bg-white rounded-xl shadow-md p-6 mb-6">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-lg font-bold text-gray-700">今日饮食</h2>
@@ -19,50 +21,369 @@
             <button @click="showAddMeal(key)" class="ml-auto text-orange-500 text-sm hover:text-orange-600">+ 添加</button>
           </div>
           <div v-if="getMealItems(key).length > 0" class="flex flex-wrap gap-2">
-            <span v-for="(item, index) in getMealItems(key)" :key="index" class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm">{{ item.content }}</span>
+            <span v-for="(item, index) in getMealItems(key)" :key="index" 
+              class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm flex items-center gap-1">
+              {{ item.content }}
+              <span v-if="item.calories" class="text-xs text-orange-500">{{ item.calories }}卡</span>
+            </span>
           </div>
           <div v-else class="text-gray-400 text-sm">还没有记录</div>
         </div>
       </div>
     </div>
+
+    <!-- 今日营养统计 -->
     <div class="bg-gradient-to-r from-green-500 to-teal-500 rounded-xl p-6 text-white mb-6">
-      <h3 class="text-lg font-bold mb-3">今日营养统计</h3>
-      <div class="grid grid-cols-3 gap-4 text-center">
+      <h3 class="text-lg font-bold mb-3 flex items-center gap-2">
+        <span>📊</span> 今日营养统计
+      </h3>
+      <div class="grid grid-cols-4 gap-3 text-center">
         <div>
           <p class="text-2xl font-bold">{{ todayCalories }}</p>
-          <p class="text-sm text-green-100">热量</p>
+          <p class="text-xs text-green-100">热量(卡)</p>
         </div>
         <div>
-          <p class="text-2xl font-bold">-</p>
-          <p class="text-sm text-green-100">蛋白质</p>
+          <p class="text-2xl font-bold">{{ todayProtein }}g</p>
+          <p class="text-xs text-green-100">蛋白质</p>
         </div>
         <div>
-          <p class="text-2xl font-bold">-</p>
-          <p class="text-sm text-green-100">脂肪</p>
+          <p class="text-2xl font-bold">{{ todayFat }}g</p>
+          <p class="text-xs text-green-100">脂肪</p>
+        </div>
+        <div>
+          <p class="text-2xl font-bold">{{ todayCarbs }}g</p>
+          <p class="text-xs text-green-100">碳水</p>
         </div>
       </div>
-      <p class="mt-4 text-sm text-green-100 text-center">{{ todayRecords.length > 0 ? '继续保持！' : '记录饮食后查看营养统计' }}</p>
+      <div class="mt-4 bg-white/10 rounded-lg p-3">
+        <p class="text-sm text-green-100">{{ nutritionAdvice }}</p>
+      </div>
     </div>
-    <div>
-      <h2 class="text-lg font-bold text-gray-700 mb-3">推荐菜谱</h2>
-      <div class="space-y-3">
-        <div v-for="recipe in recipes" :key="recipe.name" class="bg-white rounded-xl shadow-md p-4 flex items-center gap-4">
-          <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center text-3xl">{{ recipe.icon }}</div>
-          <div class="flex-1">
-            <h4 class="font-bold text-gray-800">{{ recipe.name }}</h4>
-            <p class="text-sm text-gray-500">制作时间: {{ recipe.time }} | 营养: {{ recipe.nutrition }}</p>
+
+    <!-- 食品营养查询 -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+      <h3 class="text-lg font-bold text-gray-700 mb-4 flex items-center gap-2">
+        <span>🔍</span> 食品营养查询
+      </h3>
+      <div class="relative mb-4">
+        <input v-model="foodSearchQuery" type="text" placeholder="搜索食品营养信息..." 
+          class="w-full border border-gray-200 rounded-lg p-3 pr-10 focus:border-orange-500">
+        <button @click="searchFood" class="absolute right-2 top-1/2 -translate-y-1/2 text-orange-500">
+          🔍
+        </button>
+      </div>
+      <div v-if="searchedFoods.length > 0" class="space-y-2 max-h-40 overflow-y-auto">
+        <div v-for="food in searchedFoods" :key="food.name" 
+          class="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+          @click="selectFood(food)">
+          <div>
+            <p class="font-medium text-gray-800">{{ food.name }}</p>
+            <p class="text-xs text-gray-500">{{ food.category }}</p>
           </div>
-          <button class="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-orange-600">查看</button>
+          <div class="text-right">
+            <p class="text-sm font-bold text-orange-500">{{ food.calories }}卡/100g</p>
+            <p class="text-xs text-gray-400">蛋白{{ food.protein }}g | 脂肪{{ food.fat }}g</p>
+          </div>
         </div>
       </div>
+      <div v-else-if="foodSearchQuery && !searchedFoods.length" class="text-center py-4 text-gray-400">
+        <p class="text-sm">未找到相关食品</p>
+      </div>
+      <div class="mt-4 grid grid-cols-3 gap-2">
+        <button v-for="cat in foodCategories" :key="cat" @click="filterByCategory(cat)"
+          class="bg-gray-50 rounded-lg p-2 text-center text-sm hover:bg-orange-50 transition-colors">
+          {{ cat }}
+        </button>
+      </div>
     </div>
+
+    <!-- 推荐菜谱 -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold text-gray-700 flex items-center gap-2">
+          <span>👨‍🍳</span> 推荐菜谱
+        </h3>
+        <div class="flex gap-2">
+          <button @click="searchRecipes" class="text-orange-500 text-sm hover:text-orange-600 flex items-center gap-1">
+            <span>🔍</span> 搜索
+          </button>
+          <button @click="refreshRecipes" class="text-orange-500 text-sm hover:text-orange-600 flex items-center gap-1">
+            <span>🔄</span> 刷新
+          </button>
+        </div>
+      </div>
+      
+      <!-- 菜谱分类筛选 -->
+      <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+        <button v-for="cat in recipeCategories" :key="cat.value" 
+          @click="selectedRecipeCategory = cat.value"
+          :class="selectedRecipeCategory === cat.value ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600'"
+          class="px-3 py-1 rounded-full text-sm whitespace-nowrap transition-colors">
+          {{ cat.label }}
+        </button>
+      </div>
+      
+      <div v-if="filteredRecipes.length > 0" class="space-y-3">
+        <div v-for="recipe in filteredRecipes" :key="recipe.id" 
+          class="border border-gray-100 rounded-xl p-4 hover:border-orange-200 transition-colors cursor-pointer"
+          @click="viewRecipe(recipe)">
+          <div class="flex items-start gap-4">
+            <div class="w-20 h-20 bg-gradient-to-br from-orange-100 to-amber-100 rounded-xl flex items-center justify-center text-4xl">
+              {{ recipe.icon }}
+            </div>
+            <div class="flex-1">
+              <h4 class="font-bold text-gray-800 mb-1">{{ recipe.name }}</h4>
+              <p class="text-sm text-gray-500 mb-2">{{ recipe.description }}</p>
+              <div class="flex items-center gap-4 text-xs text-gray-400">
+                <span class="flex items-center gap-1">
+                  <span>⏱️</span> {{ recipe.time }}
+                </span>
+                <span class="flex items-center gap-1">
+                  <span>🔥</span> {{ recipe.calories }}卡
+                </span>
+                <span class="flex items-center gap-1">
+                  <span>📊</span> {{ recipe.difficulty }}
+                </span>
+              </div>
+              <div class="flex gap-1 mt-2">
+                <span v-for="tag in recipe.tags" :key="tag" class="bg-orange-50 text-orange-600 text-xs px-2 py-0.5 rounded">
+                  {{ tag }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div v-else class="text-center py-8 text-gray-400">
+        <div class="text-4xl mb-3">👨‍🍳</div>
+        <p>暂无推荐菜谱</p>
+        <p class="text-sm">点击刷新获取更多菜谱</p>
+      </div>
+    </div>
+
+    <!-- 添加食物弹窗 -->
     <div v-if="showAddModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div class="bg-white rounded-xl p-6 w-full max-w-sm">
-        <h3 class="text-lg font-bold text-gray-800 mb-4">添加食物</h3>
-        <input v-model="newFood" type="text" placeholder="请输入食物名称" class="w-full border border-gray-200 rounded-lg p-3 mb-4 focus:border-orange-500">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">添加 {{ mealTypes[currentMealType].name }}</h3>
+        
+        <!-- 语音输入按钮 -->
+        <button @click="toggleVoiceInput" 
+          :class="isVoiceInput ? 'bg-red-500 text-white animate-pulse' : 'bg-orange-500 text-white'"
+          class="w-full py-3 rounded-xl font-medium mb-4 flex items-center justify-center gap-2 transition-all">
+          <span class="text-xl">{{ isVoiceInput ? '⏹️' : '🎤' }}</span>
+          {{ isVoiceInput ? '停止语音输入' : '语音输入' }}
+        </button>
+        <p v-if="isVoiceInput" class="text-center text-orange-500 text-sm mb-4 animate-pulse">
+          请说出您吃的食物，如"一碗米饭"或"两个鸡蛋"
+        </p>
+        
+        <input v-model="newFood" type="text" placeholder="请输入食物名称" 
+          class="w-full border border-gray-200 rounded-lg p-3 mb-3 focus:border-orange-500">
+        
+        <!-- 快速选择常见食物 -->
+        <div class="mb-4">
+          <p class="text-sm text-gray-500 mb-2">快速选择：</p>
+          <div class="flex flex-wrap gap-2">
+            <button v-for="food in commonFoods" :key="food.name" 
+              @click="quickAddFood(food)"
+              class="bg-gray-50 rounded-lg px-3 py-1 text-sm hover:bg-orange-50 transition-colors">
+              {{ food.name }}
+            </button>
+          </div>
+        </div>
+        
+        <!-- 营养信息显示 -->
+        <div v-if="selectedFoodInfo" class="bg-orange-50 rounded-lg p-3 mb-4">
+          <p class="text-sm font-medium text-gray-800 mb-2">{{ selectedFoodInfo.name }} 营养信息</p>
+          <div class="grid grid-cols-4 gap-2 text-center text-xs">
+            <div>
+              <p class="font-bold text-orange-500">{{ selectedFoodInfo.calories }}卡</p>
+              <p class="text-gray-500">热量</p>
+            </div>
+            <div>
+              <p class="font-bold text-green-500">{{ selectedFoodInfo.protein }}g</p>
+              <p class="text-gray-500">蛋白</p>
+            </div>
+            <div>
+              <p class="font-bold text-yellow-500">{{ selectedFoodInfo.fat }}g</p>
+              <p class="text-gray-500">脂肪</p>
+            </div>
+            <div>
+              <p class="font-bold text-blue-500">{{ selectedFoodInfo.carbs }}g</p>
+              <p class="text-gray-500">碳水</p>
+            </div>
+          </div>
+        </div>
+        
         <div class="flex gap-3">
-          <button @click="showAddModal = false" class="flex-1 bg-gray-100 text-gray-600 py-2 rounded-lg hover:bg-gray-200">取消</button>
-          <button @click="addFood" class="flex-1 bg-orange-500 text-white py-2 rounded-lg hover:bg-orange-600">确定</button>
+          <button @click="showAddModal = false" class="flex-1 bg-gray-100 text-gray-600 py-3 rounded-lg hover:bg-gray-200">取消</button>
+          <button @click="addFood" class="flex-1 bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 菜谱搜索弹窗 -->
+    <div v-if="showRecipeSearchModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-xl p-6 w-full max-w-sm max-h-[90vh] overflow-y-auto">
+        <h3 class="text-lg font-bold text-gray-800 mb-4">搜索菜谱</h3>
+        <input v-model="recipeSearchQuery" type="text" placeholder="输入菜名或食材..." 
+          class="w-full border border-gray-200 rounded-lg p-3 mb-4 focus:border-orange-500">
+        <div v-if="recipeSearchResults.length > 0" class="space-y-3">
+          <div v-for="recipe in recipeSearchResults" :key="recipe.id" 
+            class="border border-gray-100 rounded-lg p-3 hover:border-orange-200 cursor-pointer"
+            @click="viewRecipe(recipe); showRecipeSearchModal = false">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">{{ recipe.icon }}</span>
+              <div>
+                <p class="font-medium text-gray-800">{{ recipe.name }}</p>
+                <p class="text-xs text-gray-500">{{ recipe.time }} | {{ recipe.calories }}卡</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div v-else-if="recipeSearchQuery" class="text-center py-6 text-gray-400">
+          <p>未找到相关菜谱</p>
+        </div>
+        <button @click="showRecipeSearchModal = false" class="w-full mt-4 bg-gray-100 text-gray-600 py-3 rounded-lg hover:bg-gray-200">
+          关闭
+        </button>
+      </div>
+    </div>
+
+    <!-- 菜谱详情弹窗 -->
+    <div v-if="showRecipeDetailModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div class="bg-white rounded-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <!-- 菜谱头部 -->
+        <div class="bg-gradient-to-r from-orange-500 to-amber-500 p-6 text-white sticky top-0 z-10">
+          <div class="flex items-center justify-between mb-4">
+            <button @click="closeRecipeModal" class="text-white/80 hover:text-white">
+              ✕ 关闭
+            </button>
+            <button @click="speakRecipe" class="text-white/80 hover:text-white flex items-center gap-1">
+              <span>{{ isSpeaking ? '⏹️' : '🔊' }}</span> {{ isSpeaking ? '停止播报' : '语音播报' }}
+            </button>
+          </div>
+          <div class="text-center">
+            <div class="w-24 h-24 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-4 text-5xl">
+              {{ currentRecipe?.icon }}
+            </div>
+            <h2 class="text-2xl font-bold mb-2">{{ currentRecipe?.name }}</h2>
+            <p class="text-orange-200">{{ currentRecipe?.description }}</p>
+            <div class="flex justify-center gap-4 mt-4 text-sm">
+              <span class="flex items-center gap-1">
+                <span>⏱️</span> {{ currentRecipe?.time }}
+              </span>
+              <span class="flex items-center gap-1">
+                <span>🔥</span> {{ currentRecipe?.calories }}卡
+              </span>
+              <span class="flex items-center gap-1">
+                <span>📊</span> {{ currentRecipe?.difficulty }}
+              </span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 菜谱内容 -->
+        <div class="p-6">
+          <!-- 食材准备 -->
+          <div class="mb-6">
+            <h3 class="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+              <span>🥗</span> 食材准备
+            </h3>
+            <div class="bg-green-50 rounded-lg p-4">
+              <div class="grid grid-cols-2 gap-2">
+                <div v-for="ingredient in currentRecipe?.ingredients" :key="ingredient.name" 
+                  class="flex items-center gap-2">
+                  <span class="text-lg">{{ ingredient.icon }}</span>
+                  <span class="text-sm text-gray-700">{{ ingredient.name }} {{ ingredient.amount }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 制作步骤（图文教学） -->
+          <div class="mb-6">
+            <h3 class="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+              <span>📝</span> 制作步骤
+            </h3>
+            <div class="space-y-4">
+              <div v-for="(step, index) in currentRecipe?.steps" :key="index" 
+                class="border border-gray-100 rounded-lg p-4">
+                <div class="flex items-start gap-4">
+                  <div class="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold">
+                    {{ index + 1 }}
+                  </div>
+                  <div class="flex-1">
+                    <p class="text-gray-800 mb-2">{{ step.description }}</p>
+                    <div v-if="step.image" class="bg-gray-50 rounded-lg p-2 text-center">
+                      <span class="text-4xl">{{ step.image }}</span>
+                      <p class="text-xs text-gray-400 mt-1">{{ step.tip }}</p>
+                    </div>
+                    <div v-if="step.tip" class="mt-2 bg-yellow-50 rounded-lg p-2 text-xs text-yellow-700">
+                      💡 {{ step.tip }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 制作视频 -->
+          <div class="mb-6">
+            <h3 class="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+              <span>🎬</span> 制作视频
+            </h3>
+            <div class="bg-gray-900 rounded-lg aspect-video flex items-center justify-center">
+              <div class="text-center text-white">
+                <div class="text-6xl mb-4">🎬</div>
+                <p class="text-lg font-medium mb-2">{{ currentRecipe?.name }} 制作教程</p>
+                <button @click="playVideo" class="bg-orange-500 text-white px-6 py-2 rounded-lg hover:bg-orange-600 transition-colors">
+                  ▶ 播放视频
+                </button>
+                <p class="text-xs text-gray-400 mt-2">视频时长：{{ currentRecipe?.videoDuration || '5分钟' }}</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 营养价值 -->
+          <div class="mb-6">
+            <h3 class="text-lg font-bold text-gray-700 mb-3 flex items-center gap-2">
+              <span>📊</span> 营养价值
+            </h3>
+            <div class="bg-blue-50 rounded-lg p-4">
+              <div class="grid grid-cols-4 gap-3 text-center">
+                <div>
+                  <p class="text-xl font-bold text-orange-500">{{ currentRecipe?.nutrition?.calories }}卡</p>
+                  <p class="text-xs text-gray-500">热量</p>
+                </div>
+                <div>
+                  <p class="text-xl font-bold text-green-500">{{ currentRecipe?.nutrition?.protein }}g</p>
+                  <p class="text-xs text-gray-500">蛋白质</p>
+                </div>
+                <div>
+                  <p class="text-xl font-bold text-yellow-500">{{ currentRecipe?.nutrition?.fat }}g</p>
+                  <p class="text-xs text-gray-500">脂肪</p>
+                </div>
+                <div>
+                  <p class="text-xl font-bold text-blue-500">{{ currentRecipe?.nutrition?.carbs }}g</p>
+                  <p class="text-xs text-gray-500">碳水</p>
+                </div>
+              </div>
+              <div class="mt-3 text-sm text-gray-600">
+                <p>{{ currentRecipe?.nutrition?.benefit }}</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 小贴士 -->
+          <div class="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg p-4 border border-yellow-200">
+            <h4 class="font-bold text-gray-700 mb-2 flex items-center gap-2">
+              <span>💡</span> 小贴士
+            </h4>
+            <ul class="text-sm text-gray-600 space-y-1">
+              <li v-for="tip in currentRecipe?.tips" :key="tip">• {{ tip }}</li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
@@ -70,28 +391,940 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, onUnmounted } from 'vue'
 import { useAppStore } from '../stores/appStore'
+import { useToastStore } from '../stores/toastStore'
+import { voiceAssistant } from '../utils/voiceAssistant'
 import AppIcon from '../components/AppIcon.vue'
 
 const store = useAppStore()
+const toast = useToastStore()
 
 const today = new Date().toLocaleDateString('zh-CN', { month: 'long', day: 'numeric' })
 const showAddModal = ref(false)
+const showRecipeSearchModal = ref(false)
+const showRecipeDetailModal = ref(false)
 const currentMealType = ref('breakfast')
 const newFood = ref('')
+const isVoiceInput = ref(false)
+const selectedFoodInfo = ref(null)
 
-const recipes = [
-  { name: '西红柿营养汤', icon: '🍜', time: '20分钟', nutrition: '营养均衡' },
-  { name: '鸡肉蘑菇蒸片', icon: '🍗', time: '30分钟', nutrition: '蛋白质丰富' },
-  { name: '青菜炒香菇', icon: '🥬', time: '15分钟', nutrition: '维生素丰富' }
-]
+// 食品搜索
+const foodSearchQuery = ref('')
+const searchedFoods = ref([])
+const foodCategories = ['主食', '蔬菜', '肉类', '水果', '豆类', '奶类']
+
+// 菜谱搜索和筛选
+const recipeSearchQuery = ref('')
+const recipeSearchResults = ref([])
+const selectedRecipeCategory = ref('all')
+const currentRecipe = ref(null)
+const recipeSeed = ref(0)
 
 const mealTypes = {
   breakfast: { type: 'breakfast', name: '早餐', icon: '🍳' },
   lunch: { type: 'lunch', name: '午餐', icon: '🍲' },
   dinner: { type: 'dinner', name: '晚餐', icon: '🥗' }
 }
+
+const recipeCategories = [
+  { value: 'all', label: '全部' },
+  { value: 'easy', label: '简单易做' },
+  { value: 'healthy', label: '健康养生' },
+  { value: 'soup', label: '汤类' },
+  { value: 'vegetable', label: '蔬菜' },
+  { value: 'meat', label: '肉类' },
+  { value: 'seafood', label: '海鲜' },
+  { value: 'dessert', label: '甜品' }
+]
+
+// 常见食物快速选择
+const commonFoods = [
+  { name: '米饭', calories: 116, protein: 2.6, fat: 0.3, carbs: 25.9 },
+  { name: '面条', calories: 110, protein: 3.2, fat: 0.6, carbs: 24.8 },
+  { name: '鸡蛋', calories: 144, protein: 13.3, fat: 8.8, carbs: 2.8 },
+  { name: '牛奶', calories: 54, protein: 3.0, fat: 3.2, carbs: 3.4 },
+  { name: '馒头', calories: 221, protein: 7.0, fat: 1.1, carbs: 45.8 },
+  { name: '粥', calories: 46, protein: 1.1, fat: 0.3, carbs: 9.9 }
+]
+
+// 食品营养知识库
+const nutritionDatabase = [
+  // 主食类
+  { name: '米饭', category: '主食', icon: '🍚', calories: 116, protein: 2.6, fat: 0.3, carbs: 25.9, vitamin: 'B1', mineral: '钾' },
+  { name: '面条', category: '主食', icon: '🍜', calories: 110, protein: 3.2, fat: 0.6, carbs: 24.8, vitamin: 'B1', mineral: '钠' },
+  { name: '馒头', category: '主食', icon: '🥟', calories: 221, protein: 7.0, fat: 1.1, carbs: 45.8, vitamin: 'B1', mineral: '钙' },
+  { name: '粥', category: '主食', icon: '🥣', calories: 46, protein: 1.1, fat: 0.3, carbs: 9.9, vitamin: 'B1', mineral: '钾' },
+  { name: '面包', category: '主食', icon: '🍞', calories: 265, protein: 8.3, fat: 3.2, carbs: 50.0, vitamin: 'B1', mineral: '钠' },
+  { name: '饺子', category: '主食', icon: '🥟', calories: 198, protein: 6.8, fat: 4.5, carbs: 28.6, vitamin: 'B1', mineral: '钙' },
+  
+  // 蔬菜类
+  { name: '西红柿', category: '蔬菜', icon: '🍅', calories: 15, protein: 0.9, fat: 0.2, carbs: 3.3, vitamin: 'C', mineral: '钾' },
+  { name: '黄瓜', category: '蔬菜', icon: '🥒', calories: 15, protein: 0.8, fat: 0.2, carbs: 2.9, vitamin: 'C', mineral: '钾' },
+  { name: '白菜', category: '蔬菜', icon: '🥬', calories: 13, protein: 1.2, fat: 0.2, carbs: 2.4, vitamin: 'C', mineral: '钙' },
+  { name: '菠菜', category: '蔬菜', icon: '🥬', calories: 23, protein: 2.6, fat: 0.3, carbs: 3.6, vitamin: 'A', mineral: '铁' },
+  { name: '土豆', category: '蔬菜', icon: '🥔', calories: 77, protein: 2.0, fat: 0.1, carbs: 17.2, vitamin: 'C', mineral: '钾' },
+  { name: '胡萝卜', category: '蔬菜', icon: '🥕', calories: 25, protein: 1.0, fat: 0.2, carbs: 6.0, vitamin: 'A', mineral: '钾' },
+  { name: '茄子', category: '蔬菜', icon: '🍆', calories: 21, protein: 1.1, fat: 0.2, carbs: 4.9, vitamin: 'C', mineral: '钾' },
+  { name: '青椒', category: '蔬菜', icon: '🫑', calories: 22, protein: 1.0, fat: 0.2, carbs: 4.9, vitamin: 'C', mineral: '钾' },
+  { name: '西兰花', category: '蔬菜', icon: '🥦', calories: 34, protein: 2.8, fat: 0.4, carbs: 6.8, vitamin: 'C', mineral: '钙' },
+  { name: '蘑菇', category: '蔬菜', icon: '🍄', calories: 20, protein: 2.9, fat: 0.3, carbs: 3.3, vitamin: 'D', mineral: '钾' },
+  
+  // 肉类
+  { name: '猪肉', category: '肉类', icon: '🥩', calories: 143, protein: 20.3, fat: 6.2, carbs: 0, vitamin: 'B1', mineral: '铁' },
+  { name: '牛肉', category: '肉类', icon: '🥩', calories: 125, protein: 20.0, fat: 4.0, carbs: 0, vitamin: 'B12', mineral: '铁' },
+  { name: '鸡肉', category: '肉类', icon: '🍗', calories: 167, protein: 19.3, fat: 9.4, carbs: 0, vitamin: 'B6', mineral: '磷' },
+  { name: '鸭肉', category: '肉类', icon: '🦆', calories: 240, protein: 15.5, fat: 19.7, carbs: 0, vitamin: 'B1', mineral: '铁' },
+  { name: '羊肉', category: '肉类', icon: '🥩', calories: 203, protein: 19.0, fat: 14.1, carbs: 0, vitamin: 'B12', mineral: '铁' },
+  
+  // 海鲜类
+  { name: '鱼', category: '海鲜', icon: '🐟', calories: 104, protein: 18.0, fat: 2.5, carbs: 0, vitamin: 'D', mineral: '钙' },
+  { name: '虾', category: '海鲜', icon: '🦐', calories: 87, protein: 18.6, fat: 0.8, carbs: 2.8, vitamin: 'B12', mineral: '磷' },
+  { name: '螃蟹', category: '海鲜', icon: '🦀', calories: 95, protein: 17.5, fat: 2.3, carbs: 0, vitamin: 'B12', mineral: '钙' },
+  { name: '带鱼', category: '海鲜', icon: '🐟', calories: 127, protein: 17.7, fat: 6.0, carbs: 0, vitamin: 'A', mineral: '磷' },
+  
+  // 蛋奶类
+  { name: '鸡蛋', category: '蛋奶', icon: '🥚', calories: 144, protein: 13.3, fat: 8.8, carbs: 2.8, vitamin: 'A', mineral: '铁' },
+  { name: '鸭蛋', category: '蛋奶', icon: '🥚', calories: 180, protein: 12.6, fat: 13.0, carbs: 3.1, vitamin: 'A', mineral: '铁' },
+  { name: '牛奶', category: '蛋奶', icon: '🥛', calories: 54, protein: 3.0, fat: 3.2, carbs: 3.4, vitamin: 'D', mineral: '钙' },
+  { name: '酸奶', category: '蛋奶', icon: '🥛', calories: 72, protein: 2.5, fat: 2.7, carbs: 9.3, vitamin: 'D', mineral: '钙' },
+  
+  // 豆类
+  { name: '豆腐', category: '豆类', icon: '🧈', calories: 81, protein: 8.1, fat: 3.7, carbs: 4.2, vitamin: 'B1', mineral: '钙' },
+  { name: '豆浆', category: '豆类', icon: '🥛', calories: 31, protein: 1.8, fat: 1.1, carbs: 1.8, vitamin: 'B1', mineral: '钙' },
+  { name: '黄豆', category: '豆类', icon: '🫘', calories: 359, protein: 35.0, fat: 16.0, carbs: 34.2, vitamin: 'B1', mineral: '铁' },
+  
+  // 水果类
+  { name: '苹果', category: '水果', icon: '🍎', calories: 52, protein: 0.3, fat: 0.2, carbs: 13.8, vitamin: 'C', mineral: '钾' },
+  { name: '香蕉', category: '水果', icon: '🍌', calories: 89, protein: 1.1, fat: 0.3, carbs: 22.8, vitamin: 'B6', mineral: '钾' },
+  { name: '橙子', category: '水果', icon: '🍊', calories: 47, protein: 0.9, fat: 0.1, carbs: 11.8, vitamin: 'C', mineral: '钾' },
+  { name: '西瓜', category: '水果', icon: '🍉', calories: 31, protein: 0.6, fat: 0.1, carbs: 7.6, vitamin: 'A', mineral: '钾' },
+  { name: '葡萄', category: '水果', icon: '🍇', calories: 69, protein: 0.4, fat: 0.2, carbs: 17.0, vitamin: 'C', mineral: '钾' },
+  { name: '梨', category: '水果', icon: '🍐', calories: 41, protein: 0.4, fat: 0.1, carbs: 10.5, vitamin: 'C', mineral: '钾' }
+]
+
+// 菜谱知识库
+const recipeDatabase = [
+  {
+    id: 1,
+    name: '西红柿鸡蛋汤',
+    icon: '🍅',
+    category: 'soup',
+    tags: ['简单易做', '营养丰富', '适合老人'],
+    description: '经典家常汤品，酸甜可口，营养丰富',
+    time: '15分钟',
+    calories: '120卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '西红柿', amount: '2个', icon: '🍅' },
+      { name: '鸡蛋', amount: '2个', icon: '🥚' },
+      { name: '葱花', amount: '适量', icon: '🌿' },
+      { name: '盐', amount: '少许', icon: '🧂' }
+    ],
+    steps: [
+      { description: '西红柿洗净切块，鸡蛋打散备用', image: '🍅🥚', tip: '西红柿切块不要太小' },
+      { description: '锅中加水烧开，放入西红柿煮3分钟', image: '🔥', tip: '水开后转小火' },
+      { description: '慢慢倒入蛋液，形成蛋花', image: '🥣', tip: '边倒边搅拌，蛋花更漂亮' },
+      { description: '加入盐调味，撒上葱花即可', image: '🌿', tip: '可以加一点香油提香' }
+    ],
+    nutrition: { calories: 120, protein: 8, fat: 6, carbs: 8, benefit: '富含维生素C和蛋白质，适合老年人食用' },
+    tips: ['西红柿先去皮口感更好', '蛋液要慢慢倒入', '可以加一点糖调味'],
+    videoDuration: '5分钟'
+  },
+  {
+    id: 2,
+    name: '清蒸鲈鱼',
+    icon: '🐟',
+    category: 'seafood',
+    tags: ['健康养生', '低脂肪', '高蛋白'],
+    description: '清淡鲜美，保留鱼肉原味，营养不流失',
+    time: '20分钟',
+    calories: '150卡',
+    difficulty: '中等',
+    ingredients: [
+      { name: '鲈鱼', amount: '1条', icon: '🐟' },
+      { name: '姜丝', amount: '适量', icon: '🌿' },
+      { name: '葱丝', amount: '适量', icon: '🌿' },
+      { name: '蒸鱼豉油', amount: '2勺', icon: '🫗' }
+    ],
+    steps: [
+      { description: '鲈鱼洗净，在鱼身上划几刀', image: '🐟', tip: '划刀便于入味' },
+      { description: '鱼身铺上姜丝，放入蒸锅', image: '🔥', tip: '水开后再放鱼' },
+      { description: '大火蒸8-10分钟', image: '⏱️', tip: '时间不宜过长' },
+      { description: '取出撒上葱丝，淋上蒸鱼豉油', image: '🥢', tip: '可以淋一点热油' }
+    ],
+    nutrition: { calories: 150, protein: 18, fat: 5, carbs: 2, benefit: '富含优质蛋白和DHA，有益心脑血管健康' },
+    tips: ['鱼要新鲜', '蒸的时间要控制好', '姜丝可以去腥'],
+    videoDuration: '8分钟'
+  },
+  {
+    id: 3,
+    name: '蒜蓉西兰花',
+    icon: '🥦',
+    category: 'vegetable',
+    tags: ['简单易做', '抗氧化', '适合老人'],
+    description: '清脆爽口，营养丰富，抗氧化佳品',
+    time: '10分钟',
+    calories: '80卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '西兰花', amount: '1颗', icon: '🥦' },
+      { name: '蒜末', amount: '适量', icon: '🧄' },
+      { name: '盐', amount: '少许', icon: '🧂' },
+      { name: '油', amount: '适量', icon: '🫗' }
+    ],
+    steps: [
+      { description: '西兰花洗净切小朵', image: '🥦', tip: '大小要均匀' },
+      { description: '锅中烧水，西兰花焯水2分钟', image: '🔥', tip: '焯水保持翠绿' },
+      { description: '热锅下油，爆香蒜末', image: '🧄', tip: '蒜末不要炒焦' },
+      { description: '放入西兰花翻炒，加盐调味', image: '🥢', tip: '快速翻炒即可' }
+    ],
+    nutrition: { calories: 80, protein: 4, fat: 3, carbs: 6, benefit: '富含维生素C和抗氧化物质，增强免疫力' },
+    tips: ['焯水时间不宜过长', '蒜末要新鲜', '可以加一点蚝油'],
+    videoDuration: '5分钟'
+  },
+  {
+    id: 4,
+    name: '红烧肉',
+    icon: '🥩',
+    category: 'meat',
+    tags: ['经典美味', '软烂入味', '传统菜'],
+    description: '色泽红亮，肥而不腻，入口即化',
+    time: '60分钟',
+    calories: '350卡',
+    difficulty: '中等',
+    ingredients: [
+      { name: '五花肉', amount: '500g', icon: '🥩' },
+      { name: '冰糖', amount: '30g', icon: '🍬' },
+      { name: '生抽', amount: '2勺', icon: '🫗' },
+      { name: '老抽', amount: '1勺', icon: '🫗' },
+      { name: '八角', amount: '2个', icon: '🌟' }
+    ],
+    steps: [
+      { description: '五花肉切块，冷水下锅焯水', image: '🥩', tip: '焯水去腥' },
+      { description: '锅中放冰糖炒糖色', image: '🍬', tip: '小火慢炒' },
+      { description: '放入肉块翻炒上色', image: '🔥', tip: '每面都要上色' },
+      { description: '加入调料和适量水，小火炖40分钟', image: '⏱️', tip: '水要没过肉' },
+      { description: '大火收汁即可', image: '🥢', tip: '汁要浓稠' }
+    ],
+    nutrition: { calories: 350, protein: 15, fat: 28, carbs: 5, benefit: '提供能量和蛋白质，但要适量食用' },
+    tips: ['肉要选五花肉', '炒糖色要小心', '炖的时间要够'],
+    videoDuration: '10分钟'
+  },
+  {
+    id: 5,
+    name: '香菇鸡汤',
+    icon: '🍄',
+    category: 'soup',
+    tags: ['滋补养生', '增强免疫', '适合老人'],
+    description: '滋补汤品，清香鲜美，增强体质',
+    time: '45分钟',
+    calories: '180卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '鸡肉', amount: '500g', icon: '🍗' },
+      { name: '香菇', amount: '8朵', icon: '🍄' },
+      { name: '姜片', amount: '3片', icon: '🌿' },
+      { name: '枸杞', amount: '适量', icon: '🔴' }
+    ],
+    steps: [
+      { description: '鸡肉洗净切块，焯水去腥', image: '🍗', tip: '冷水下锅' },
+      { description: '香菇洗净泡发', image: '🍄', tip: '温水泡发更快' },
+      { description: '锅中加水，放入鸡肉和姜片', image: '🔥', tip: '水要一次加够' },
+      { description: '大火烧开转小火炖30分钟', image: '⏱️', tip: '小火慢炖' },
+      { description: '加入香菇和枸杞，再炖10分钟', image: '🥣', tip: '最后加盐调味' }
+    ],
+    nutrition: { calories: 180, protein: 20, fat: 8, carbs: 5, benefit: '富含蛋白质和多种氨基酸，滋补养生' },
+    tips: ['鸡肉要新鲜', '香菇要泡发好', '炖的时间要够'],
+    videoDuration: '8分钟'
+  },
+  {
+    id: 6,
+    name: '青菜豆腐汤',
+    icon: '🥬',
+    category: 'soup',
+    tags: ['清淡健康', '低热量', '适合老人'],
+    description: '清淡爽口，营养均衡，老少皆宜',
+    time: '15分钟',
+    calories: '60卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '青菜', amount: '200g', icon: '🥬' },
+      { name: '豆腐', amount: '200g', icon: '🧈' },
+      { name: '姜丝', amount: '少许', icon: '🌿' },
+      { name: '盐', amount: '适量', icon: '🧂' }
+    ],
+    steps: [
+      { description: '青菜洗净切段，豆腐切块', image: '🥬🧈', tip: '豆腐切小块' },
+      { description: '锅中加水烧开，放入姜丝', image: '🔥', tip: '姜丝去腥' },
+      { description: '放入豆腐煮5分钟', image: '🥣', tip: '豆腐先煮入味' },
+      { description: '加入青菜，煮2分钟', image: '🥬', tip: '青菜不宜久煮' },
+      { description: '加盐调味即可', image: '🧂', tip: '可以加一点香油' }
+    ],
+    nutrition: { calories: 60, protein: 6, fat: 2, carbs: 4, benefit: '富含钙质和维生素，清淡健康' },
+    tips: ['青菜要新鲜', '豆腐要嫩豆腐', '煮的时间要控制'],
+    videoDuration: '5分钟'
+  },
+  {
+    id: 7,
+    name: '土豆炖牛肉',
+    icon: '🥔',
+    category: 'meat',
+    tags: ['营养丰富', '软烂入味', '家常菜'],
+    description: '牛肉软烂，土豆入味，营养美味',
+    time: '50分钟',
+    calories: '280卡',
+    difficulty: '中等',
+    ingredients: [
+      { name: '牛肉', amount: '300g', icon: '🥩' },
+      { name: '土豆', amount: '2个', icon: '🥔' },
+      { name: '胡萝卜', amount: '1根', icon: '🥕' },
+      { name: '八角', amount: '2个', icon: '🌟' }
+    ],
+    steps: [
+      { description: '牛肉切块焯水去腥', image: '🥩', tip: '冷水下锅焯水' },
+      { description: '土豆和胡萝卜切块', image: '🥔🥕', tip: '大小要均匀' },
+      { description: '锅中放牛肉和调料，加水炖30分钟', image: '🔥', tip: '小火慢炖' },
+      { description: '加入土豆和胡萝卜，继续炖20分钟', image: '🥣', tip: '土豆炖软烂' },
+      { description: '大火收汁即可', image: '🥢', tip: '汁要浓稠' }
+    ],
+    nutrition: { calories: 280, protein: 18, fat: 12, carbs: 20, benefit: '富含蛋白质和碳水化合物，提供能量' },
+    tips: ['牛肉要选牛腩', '土豆要后放', '炖的时间要够'],
+    videoDuration: '10分钟'
+  },
+  {
+    id: 8,
+    name: '糖醋排骨',
+    icon: '🍖',
+    category: 'meat',
+    tags: ['酸甜可口', '经典美味', '开胃'],
+    description: '酸甜适中，外酥里嫩，老少皆爱',
+    time: '40分钟',
+    calories: '320卡',
+    difficulty: '中等',
+    ingredients: [
+      { name: '排骨', amount: '500g', icon: '🍖' },
+      { name: '糖', amount: '30g', icon: '🍬' },
+      { name: '醋', amount: '2勺', icon: '🫗' },
+      { name: '生抽', amount: '1勺', icon: '🫗' }
+    ],
+    steps: [
+      { description: '排骨洗净切段，焯水去腥', image: '🍖', tip: '冷水下锅' },
+      { description: '锅中放油，排骨炸至金黄', image: '🔥', tip: '油温要控制' },
+      { description: '另起锅放糖炒糖色', image: '🍬', tip: '小火慢炒' },
+      { description: '放入排骨，加调料翻炒', image: '🥢', tip: '翻炒均匀' },
+      { description: '加适量水炖20分钟，收汁', image: '🥣', tip: '汁要裹住排骨' }
+    ],
+    nutrition: { calories: 320, protein: 16, fat: 20, carbs: 15, benefit: '提供蛋白质和能量，酸甜开胃' },
+    tips: ['排骨要选小排', '糖醋比例要调好', '收汁要浓稠'],
+    videoDuration: '10分钟'
+  },
+  {
+    id: 9,
+    name: '银耳莲子汤',
+    icon: '🥣',
+    category: 'dessert',
+    tags: ['养生甜品', '润肺养颜', '适合老人'],
+    description: '清甜滋润，润肺养颜，养生佳品',
+    time: '60分钟',
+    calories: '100卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '银耳', amount: '1朵', icon: '🥣' },
+      { name: '莲子', amount: '50g', icon: '🫘' },
+      { name: '枸杞', amount: '适量', icon: '🔴' },
+      { name: '冰糖', amount: '适量', icon: '🍬' }
+    ],
+    steps: [
+      { description: '银耳泡发撕小朵', image: '🥣', tip: '温水泡发2小时' },
+      { description: '莲子洗净去芯', image: '🫘', tip: '莲子芯要去掉' },
+      { description: '锅中加水，放入银耳炖40分钟', image: '🔥', tip: '小火慢炖' },
+      { description: '加入莲子和冰糖，继续炖20分钟', image: '🥣', tip: '炖至软烂' },
+      { description: '最后加入枸杞即可', image: '🔴', tip: '枸杞最后放' }
+    ],
+    nutrition: { calories: 100, protein: 2, fat: 0.5, carbs: 20, benefit: '润肺养颜，滋阴润燥，适合老年人' },
+    tips: ['银耳要泡发好', '莲子要去芯', '炖的时间要够'],
+    videoDuration: '8分钟'
+  },
+  {
+    id: 10,
+    name: '清炒时蔬',
+    icon: '🥬',
+    category: 'vegetable',
+    tags: ['简单快手', '清淡健康', '低热量'],
+    description: '简单快手，清淡爽口，保留蔬菜原味',
+    time: '10分钟',
+    calories: '50卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '青菜', amount: '300g', icon: '🥬' },
+      { name: '蒜末', amount: '适量', icon: '🧄' },
+      { name: '盐', amount: '少许', icon: '🧂' },
+      { name: '油', amount: '适量', icon: '🫗' }
+    ],
+    steps: [
+      { description: '青菜洗净切段', image: '🥬', tip: '沥干水分' },
+      { description: '热锅下油，爆香蒜末', image: '🧄', tip: '蒜末不要炒焦' },
+      { description: '放入青菜快速翻炒', image: '🔥', tip: '大火快炒' },
+      { description: '加盐调味，出锅即可', image: '🥢', tip: '青菜不宜久炒' }
+    ],
+    nutrition: { calories: 50, protein: 2, fat: 2, carbs: 4, benefit: '富含维生素和纤维，清淡健康' },
+    tips: ['青菜要新鲜', '大火快炒', '炒的时间要短'],
+    videoDuration: '5分钟'
+  },
+  {
+    id: 11,
+    name: '蒸蛋羹',
+    icon: '🥚',
+    category: 'easy',
+    tags: ['简单易做', '软嫩滑润', '适合老人'],
+    description: '软嫩滑润，入口即化，老少皆宜',
+    time: '15分钟',
+    calories: '100卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '鸡蛋', amount: '2个', icon: '🥚' },
+      { name: '温水', amount: '适量', icon: '🫗' },
+      { name: '盐', amount: '少许', icon: '🧂' },
+      { name: '葱花', amount: '适量', icon: '🌿' }
+    ],
+    steps: [
+      { description: '鸡蛋打散，加温水搅匀', image: '🥚', tip: '水和蛋比例1:1' },
+      { description: '加盐调味，过滤蛋液', image: '🥣', tip: '过滤更细腻' },
+      { description: '盖上保鲜膜，蒸锅蒸10分钟', image: '🔥', tip: '保鲜膜要扎孔' },
+      { description: '出锅撒上葱花即可', image: '🌿', tip: '可以淋一点酱油' }
+    ],
+    nutrition: { calories: 100, protein: 8, fat: 6, carbs: 2, benefit: '富含蛋白质，软嫩易消化，适合老年人' },
+    tips: ['温水更好', '要过滤蛋液', '蒸的时间要控制'],
+    videoDuration: '5分钟'
+  },
+  {
+    id: 12,
+    name: '小米粥',
+    icon: '🥣',
+    category: 'easy',
+    tags: ['养胃暖身', '简单易做', '适合老人'],
+    description: '养胃暖身，软糯香甜，早餐佳品',
+    time: '30分钟',
+    calories: '45卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '小米', amount: '100g', icon: '🥣' },
+      { name: '水', amount: '适量', icon: '🫗' },
+      { name: '红枣', amount: '5颗', icon: '🔴' },
+      { name: '枸杞', amount: '适量', icon: '🔴' }
+    ],
+    steps: [
+      { description: '小米洗净，红枣洗净去核', image: '🥣🔴', tip: '小米要淘洗干净' },
+      { description: '锅中加水，放入小米', image: '🔥', tip: '水要一次加够' },
+      { description: '大火烧开转小火煮20分钟', image: '⏱️', tip: '小火慢熬' },
+      { description: '加入红枣和枸杞，继续煮10分钟', image: '🥣', tip: '熬至粘稠' }
+    ],
+    nutrition: { calories: 45, protein: 1.5, fat: 0.5, carbs: 9, benefit: '养胃暖身，易消化，适合老年人早餐' },
+    tips: ['小米要淘洗', '水要一次加够', '小火慢熬'],
+    videoDuration: '5分钟'
+  },
+  {
+    id: 13,
+    name: '宫保鸡丁',
+    icon: '🍗',
+    category: 'meat',
+    tags: ['经典川菜', '下饭神器', '香辣可口'],
+    description: '川菜经典，鸡肉嫩滑，花生酥脆，香辣可口',
+    time: '30分钟',
+    calories: '280卡',
+    difficulty: '中等',
+    ingredients: [
+      { name: '鸡胸肉', amount: '300g', icon: '🍗' },
+      { name: '花生米', amount: '50g', icon: '🥜' },
+      { name: '干辣椒', amount: '适量', icon: '🌶️' },
+      { name: '葱姜蒜', amount: '适量', icon: '🧄' },
+      { name: '生抽', amount: '2勺', icon: '🫗' },
+      { name: '白糖', amount: '1勺', icon: '🍬' }
+    ],
+    steps: [
+      { description: '鸡肉切丁，用盐、料酒、淀粉腌制10分钟', image: '🍗', tip: '腌制更入味' },
+      { description: '花生米炸至金黄，干辣椒切段', image: '🥜🌶️', tip: '花生不要炸焦' },
+      { description: '锅中放油，鸡丁滑炒至变色盛出', image: '🔥', tip: '大火快炒' },
+      { description: '锅中留油，爆香葱姜蒜和干辣椒', image: '🧄', tip: '不要炒糊' },
+      { description: '放入鸡丁和花生，加调料翻炒均匀', image: '🥢', tip: '快速翻炒' }
+    ],
+    nutrition: { calories: 280, protein: 20, fat: 15, carbs: 10, benefit: '蛋白质丰富，下饭可口' },
+    tips: ['鸡肉要腌够时间', '花生最后放保持酥脆', '干辣椒不要炒糊'],
+    videoDuration: '8分钟'
+  },
+  {
+    id: 14,
+    name: '麻婆豆腐',
+    icon: '🧈',
+    category: 'vegetable',
+    tags: ['经典川菜', '麻辣鲜香', '下饭神器'],
+    description: '川菜经典，麻辣鲜香，豆腐嫩滑，下饭首选',
+    time: '20分钟',
+    calories: '180卡',
+    difficulty: '中等',
+    ingredients: [
+      { name: '嫩豆腐', amount: '300g', icon: '🧈' },
+      { name: '肉末', amount: '100g', icon: '🥩' },
+      { name: '豆瓣酱', amount: '2勺', icon: '🫘' },
+      { name: '花椒粉', amount: '适量', icon: '🫘' },
+      { name: '葱姜蒜', amount: '适量', icon: '🧄' }
+    ],
+    steps: [
+      { description: '豆腐切块，焯水备用', image: '🧈', tip: '焯水去豆腥味' },
+      { description: '锅中放油，炒香肉末至变色', image: '🥩', tip: '炒至金黄' },
+      { description: '加入豆瓣酱炒出红油', image: '🫘', tip: '小火慢炒' },
+      { description: '加入豆腐，轻轻翻炒', image: '🔥', tip: '不要炒碎豆腐' },
+      { description: '撒上花椒粉和葱花，出锅', image: '🌿', tip: '花椒粉提香' }
+    ],
+    nutrition: { calories: 180, protein: 12, fat: 10, carbs: 8, benefit: '豆腐富含蛋白质，麻辣开胃' },
+    tips: ['豆腐要嫩豆腐', '豆瓣酱要炒出红油', '翻炒要轻'],
+    videoDuration: '6分钟'
+  },
+  {
+    id: 15,
+    name: '糖醋里脊',
+    icon: '🍖',
+    category: 'meat',
+    tags: ['酸甜可口', '外酥里嫩', '经典名菜'],
+    description: '酸甜适中，外酥里嫩，老少皆宜',
+    time: '35分钟',
+    calories: '350卡',
+    difficulty: '中等',
+    ingredients: [
+      { name: '猪里脊', amount: '300g', icon: '🥩' },
+      { name: '面粉', amount: '适量', icon: '🍞' },
+      { name: '淀粉', amount: '适量', icon: '🍘' },
+      { name: '醋', amount: '3勺', icon: '🫗' },
+      { name: '白糖', amount: '3勺', icon: '🍬' },
+      { name: '番茄酱', amount: '2勺', icon: '🍅' }
+    ],
+    steps: [
+      { description: '里脊肉切条，用盐、料酒腌制10分钟', image: '🥩', tip: '切均匀大小' },
+      { description: '裹上面粉和淀粉，油炸至金黄', image: '🔥', tip: '油温六成热' },
+      { description: '调糖醋汁：醋、糖、番茄酱混合', image: '🍅', tip: '酸甜比例调好' },
+      { description: '锅中放糖醋汁，小火熬至粘稠', image: '🥣', tip: '熬到起大泡' },
+      { description: '放入里脊翻炒，裹匀酱汁', image: '🥢', tip: '快速翻炒' }
+    ],
+    nutrition: { calories: 350, protein: 18, fat: 18, carbs: 15, benefit: '酸甜开胃，口感酥脆' },
+    tips: ['肉条要切均匀', '炸两遍更酥脆', '糖醋比例要调好'],
+    videoDuration: '10分钟'
+  },
+  {
+    id: 16,
+    name: '红烧肉',
+    icon: '🥩',
+    category: 'meat',
+    tags: ['经典美味', '软烂入味', '传统菜'],
+    description: '色泽红亮，肥而不腻，入口即化',
+    time: '60分钟',
+    calories: '350卡',
+    difficulty: '中等',
+    ingredients: [
+      { name: '五花肉', amount: '500g', icon: '🥩' },
+      { name: '冰糖', amount: '30g', icon: '🍬' },
+      { name: '生抽', amount: '2勺', icon: '🫗' },
+      { name: '老抽', amount: '1勺', icon: '🫗' },
+      { name: '八角', amount: '2个', icon: '🌟' }
+    ],
+    steps: [
+      { description: '五花肉切块，冷水下锅焯水', image: '🥩', tip: '焯水去腥' },
+      { description: '锅中放冰糖炒糖色', image: '🍬', tip: '小火慢炒' },
+      { description: '放入肉块翻炒上色', image: '🔥', tip: '每面都要上色' },
+      { description: '加入调料和适量水，小火炖40分钟', image: '⏱️', tip: '水要没过肉' },
+      { description: '大火收汁即可', image: '🥢', tip: '汁要浓稠' }
+    ],
+    nutrition: { calories: 350, protein: 15, fat: 28, carbs: 5, benefit: '提供能量和蛋白质，但要适量食用' },
+    tips: ['肉要选五花肉', '炒糖色要小心', '炖的时间要够'],
+    videoDuration: '10分钟'
+  },
+  {
+    id: 17,
+    name: '糖醋排骨',
+    icon: '🍖',
+    category: 'meat',
+    tags: ['酸甜可口', '经典美味', '开胃'],
+    description: '酸甜适中，外酥里嫩，老少皆爱',
+    time: '40分钟',
+    calories: '320卡',
+    difficulty: '中等',
+    ingredients: [
+      { name: '排骨', amount: '500g', icon: '🍖' },
+      { name: '糖', amount: '30g', icon: '🍬' },
+      { name: '醋', amount: '2勺', icon: '🫗' },
+      { name: '生抽', amount: '1勺', icon: '🫗' }
+    ],
+    steps: [
+      { description: '排骨洗净切段，焯水去腥', image: '🍖', tip: '冷水下锅' },
+      { description: '锅中放油，排骨炸至金黄', image: '🔥', tip: '油温要控制' },
+      { description: '另起锅放糖炒糖色', image: '🍬', tip: '小火慢炒' },
+      { description: '放入排骨，加调料翻炒', image: '🥢', tip: '翻炒均匀' },
+      { description: '加适量水炖20分钟，收汁', image: '🥣', tip: '汁要裹住排骨' }
+    ],
+    nutrition: { calories: 320, protein: 16, fat: 20, carbs: 15, benefit: '提供蛋白质和能量，酸甜开胃' },
+    tips: ['排骨要选小排', '糖醋比例要调好', '收汁要浓稠'],
+    videoDuration: '10分钟'
+  },
+  {
+    id: 18,
+    name: '酸菜鱼',
+    icon: '🐟',
+    category: 'seafood',
+    tags: ['川菜经典', '酸辣开胃', '鱼肉鲜嫩'],
+    description: '川菜经典，鱼肉鲜嫩，酸辣开胃',
+    time: '45分钟',
+    calories: '220卡',
+    difficulty: '中等',
+    ingredients: [
+      { name: '草鱼', amount: '1条', icon: '🐟' },
+      { name: '酸菜', amount: '200g', icon: '🥬' },
+      { name: '干辣椒', amount: '适量', icon: '🌶️' },
+      { name: '花椒', amount: '适量', icon: '🫘' },
+      { name: '葱姜蒜', amount: '适量', icon: '🧄' }
+    ],
+    steps: [
+      { description: '鱼肉切片，用盐、料酒、淀粉腌制', image: '🐟', tip: '腌制更入味' },
+      { description: '酸菜切碎，炒香备用', image: '🥬', tip: '炒出酸味' },
+      { description: '锅中加水，放入酸菜和鱼骨熬汤', image: '🔥', tip: '熬至汤色变白' },
+      { description: '放入鱼片，煮至变色', image: '🐟', tip: '鱼片不要煮老' },
+      { description: '撒上干辣椒和花椒，淋热油', image: '🌶️', tip: '热油激香' }
+    ],
+    nutrition: { calories: 220, protein: 20, fat: 10, carbs: 8, benefit: '鱼肉富含优质蛋白，酸辣开胃' },
+    tips: ['鱼片要薄', '酸菜要炒香', '最后淋热油激香'],
+    videoDuration: '10分钟'
+  },
+  {
+    id: 19,
+    name: '水煮牛肉',
+    icon: '🥩',
+    category: 'meat',
+    tags: ['川菜经典', '麻辣鲜香', '下饭'],
+    description: '川菜经典，麻辣鲜香，牛肉嫩滑',
+    time: '30分钟',
+    calories: '280卡',
+    difficulty: '中等',
+    ingredients: [
+      { name: '牛肉', amount: '300g', icon: '🥩' },
+      { name: '豆芽', amount: '200g', icon: '🌱' },
+      { name: '干辣椒', amount: '适量', icon: '🌶️' },
+      { name: '花椒', amount: '适量', icon: '🫘' },
+      { name: '豆瓣酱', amount: '2勺', icon: '🫘' }
+    ],
+    steps: [
+      { description: '牛肉切片，用盐、料酒、淀粉腌制', image: '🥩', tip: '腌制更嫩' },
+      { description: '豆芽焯水铺在碗底', image: '🌱', tip: '焯水去生味' },
+      { description: '锅中放豆瓣酱炒出红油，加水煮开', image: '🫘', tip: '炒出红油' },
+      { description: '放入牛肉片，煮至变色', image: '🔥', tip: '牛肉不要煮老' },
+      { description: '倒在豆芽上，撒干辣椒花椒，淋热油', image: '🌶️', tip: '热油激香' }
+    ],
+    nutrition: { calories: 280, protein: 22, fat: 15, carbs: 8, benefit: '牛肉富含蛋白质，麻辣开胃' },
+    tips: ['牛肉要逆纹切', '豆瓣酱要炒出红油', '牛肉不要煮老'],
+    videoDuration: '8分钟'
+  },
+  {
+    id: 20,
+    name: '蒜蓉大虾',
+    icon: '🦐',
+    category: 'seafood',
+    tags: ['鲜美可口', '简单易做', '高蛋白'],
+    description: '蒜香浓郁，虾肉鲜嫩，简单易做',
+    time: '20分钟',
+    calories: '150卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '大虾', amount: '500g', icon: '🦐' },
+      { name: '蒜末', amount: '大量', icon: '🧄' },
+      { name: '生抽', amount: '2勺', icon: '🫗' },
+      { name: '蚝油', amount: '1勺', icon: '🫗' },
+      { name: '葱花', amount: '适量', icon: '🌿' }
+    ],
+    steps: [
+      { description: '大虾剪去虾须，开背去虾线', image: '🦐', tip: '开背更入味' },
+      { description: '锅中放油，爆香蒜末', image: '🧄', tip: '蒜末要多' },
+      { description: '放入大虾翻炒至变红', image: '🔥', tip: '两面都要变红' },
+      { description: '加入生抽和蚝油调味', image: '🫗', tip: '快速翻炒' },
+      { description: '撒上葱花即可出锅', image: '🌿', tip: '可以加一点糖' }
+    ],
+    nutrition: { calories: 150, protein: 20, fat: 5, carbs: 3, benefit: '高蛋白低脂肪，鲜美可口' },
+    tips: ['虾要新鲜', '蒜末要多', '大火快炒'],
+    videoDuration: '6分钟'
+  },
+  {
+    id: 21,
+    name: '可乐鸡翅',
+    icon: '🍗',
+    category: 'meat',
+    tags: ['简单易做', '酸甜可口', '小朋友最爱'],
+    description: '简单易做，酸甜可口，小朋友最爱',
+    time: '30分钟',
+    calories: '250卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '鸡翅', amount: '500g', icon: '🍗' },
+      { name: '可乐', amount: '300ml', icon: '🥤' },
+      { name: '生抽', amount: '2勺', icon: '🫗' },
+      { name: '姜片', amount: '适量', icon: '🌿' }
+    ],
+    steps: [
+      { description: '鸡翅焯水去腥', image: '🍗', tip: '冷水下锅' },
+      { description: '锅中放油，煎鸡翅至两面金黄', image: '🔥', tip: '煎至金黄' },
+      { description: '加入可乐和生抽', image: '🥤', tip: '可乐要没过鸡翅' },
+      { description: '小火炖20分钟', image: '⏱️', tip: '小火慢炖' },
+      { description: '大火收汁即可', image: '🥢', tip: '汁要浓稠' }
+    ],
+    nutrition: { calories: 250, protein: 18, fat: 12, carbs: 10, benefit: '酸甜可口，小朋友喜欢' },
+    tips: ['鸡翅要煎金黄', '可乐要没过鸡翅', '收汁要浓稠'],
+    videoDuration: '6分钟'
+  },
+  {
+    id: 22,
+    name: '青椒肉丝',
+    icon: '🫑',
+    category: 'meat',
+    tags: ['家常小炒', '简单易做', '下饭'],
+    description: '家常小炒，青椒爽脆，肉丝嫩滑',
+    time: '15分钟',
+    calories: '180卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '猪肉丝', amount: '200g', icon: '🥩' },
+      { name: '青椒', amount: '2个', icon: '🫑' },
+      { name: '葱姜蒜', amount: '适量', icon: '🧄' },
+      { name: '生抽', amount: '1勺', icon: '🫗' },
+      { name: '料酒', amount: '1勺', icon: '🫗' }
+    ],
+    steps: [
+      { description: '肉丝用盐、料酒、淀粉腌制5分钟', image: '🥩', tip: '腌制更嫩' },
+      { description: '青椒切丝', image: '🫑', tip: '切均匀' },
+      { description: '锅中放油，炒肉丝至变色盛出', image: '🔥', tip: '大火快炒' },
+      { description: '锅中留油，炒青椒至断生', image: '🫑', tip: '不要炒太久' },
+      { description: '放入肉丝，加调料翻炒均匀', image: '🥢', tip: '快速翻炒' }
+    ],
+    nutrition: { calories: 180, protein: 15, fat: 8, carbs: 6, benefit: '荤素搭配，营养均衡' },
+    tips: ['肉丝要腌', '青椒不要炒太久', '大火快炒'],
+    videoDuration: '5分钟'
+  },
+  {
+    id: 23,
+    name: '蒜蓉粉丝蒸扇贝',
+    icon: '🐚',
+    category: 'seafood',
+    tags: ['鲜美可口', '宴客菜', '简单易做'],
+    description: '鲜美可口，蒜香浓郁，宴客首选',
+    time: '15分钟',
+    calories: '120卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '扇贝', amount: '8个', icon: '🐚' },
+      { name: '粉丝', amount: '1把', icon: '🍜' },
+      { name: '蒜末', amount: '适量', icon: '🧄' },
+      { name: '生抽', amount: '2勺', icon: '🫗' },
+      { name: '葱花', amount: '适量', icon: '🌿' }
+    ],
+    steps: [
+      { description: '扇贝洗净，粉丝泡发', image: '🐚', tip: '扇贝要新鲜' },
+      { description: '粉丝铺在扇贝上', image: '🍜', tip: '粉丝要泡软' },
+      { description: '放上蒜末和生抽', image: '🧄', tip: '蒜末要多' },
+      { description: '蒸锅蒸8分钟', image: '⏱️', tip: '时间不宜过长' },
+      { description: '撒上葱花，淋热油', image: '🌿', tip: '热油激香' }
+    ],
+    nutrition: { calories: 120, protein: 10, fat: 3, carbs: 10, benefit: '高蛋白低脂肪，鲜美可口' },
+    tips: ['扇贝要新鲜', '粉丝要泡软', '蒸的时间要控制'],
+    videoDuration: '5分钟'
+  },
+  {
+    id: 24,
+    name: '芒果西米露',
+    icon: '🥭',
+    category: 'dessert',
+    tags: ['夏日甜品', '清凉解暑', '简单易做'],
+    description: '清凉解暑，香甜可口，夏日必备',
+    time: '20分钟',
+    calories: '150卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '西米', amount: '100g', icon: '🍚' },
+      { name: '芒果', amount: '2个', icon: '🥭' },
+      { name: '牛奶', amount: '200ml', icon: '🥛' },
+      { name: '椰浆', amount: '50ml', icon: '🥥' },
+      { name: '冰糖', amount: '适量', icon: '🍬' }
+    ],
+    steps: [
+      { description: '西米煮至透明，过凉水', image: '🍚', tip: '煮到中间有小白点时关火焖' },
+      { description: '芒果切块', image: '🥭', tip: '一部分打泥一部分切块' },
+      { description: '锅中放牛奶和椰浆，加冰糖煮开', image: '🥛', tip: '冰糖要化开' },
+      { description: '加入西米和芒果泥', image: '🍚', tip: '搅拌均匀' },
+      { description: '冷藏后食用，放上芒果块', image: '❄️', tip: '冷藏更美味' }
+    ],
+    nutrition: { calories: 150, protein: 3, fat: 4, carbs: 25, benefit: '清凉解暑，香甜可口' },
+    tips: ['西米要煮到透明', '冷藏更美味', '芒果要熟的'],
+    videoDuration: '5分钟'
+  },
+  {
+    id: 25,
+    name: '焦糖布丁',
+    icon: '🍮',
+    category: 'dessert',
+    tags: ['法式甜品', '香浓可口', '精致'],
+    description: '法式经典，焦糖香浓，布丁嫩滑',
+    time: '30分钟',
+    calories: '200卡',
+    difficulty: '中等',
+    ingredients: [
+      { name: '鸡蛋', amount: '3个', icon: '🥚' },
+      { name: '牛奶', amount: '250ml', icon: '🥛' },
+      { name: '白糖', amount: '60g', icon: '🍬' },
+      { name: '香草精', amount: '少许', icon: '🌿' }
+    ],
+    steps: [
+      { description: '白糖加水熬成焦糖，倒入模具', image: '🍬', tip: '熬到琥珀色' },
+      { description: '鸡蛋打散，加牛奶和白糖搅匀', image: '🥚', tip: '要过筛' },
+      { description: '加入香草精，过筛后倒入模具', image: '🌿', tip: '过筛更细腻' },
+      { description: '蒸锅蒸15分钟', image: '⏱️', tip: '水开后再蒸' },
+      { description: '冷藏后倒扣脱模', image: '❄️', tip: '冷藏更美味' }
+    ],
+    nutrition: { calories: 200, protein: 8, fat: 8, carbs: 18, benefit: '香浓可口，精致甜品' },
+    tips: ['焦糖不要熬糊', '蛋液要过筛', '蒸的时间要控制'],
+    videoDuration: '8分钟'
+  },
+  {
+    id: 26,
+    name: '凉拌黄瓜',
+    icon: '🥒',
+    category: 'vegetable',
+    tags: ['清爽开胃', '简单快手', '夏日必备'],
+    description: '清爽开胃，简单快手，夏日必备凉菜',
+    time: '10分钟',
+    calories: '50卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '黄瓜', amount: '2根', icon: '🥒' },
+      { name: '蒜末', amount: '适量', icon: '🧄' },
+      { name: '醋', amount: '2勺', icon: '🫗' },
+      { name: '生抽', amount: '1勺', icon: '🫗' },
+      { name: '辣椒油', amount: '适量', icon: '🌶️' }
+    ],
+    steps: [
+      { description: '黄瓜拍碎切块', image: '🥒', tip: '拍碎更入味' },
+      { name: '蒜末', amount: '适量', icon: '🧄', tip: '蒜末要多' },
+      { description: '加入醋、生抽、辣椒油', image: '🫗', tip: '调料要拌匀' },
+      { description: '拌匀后静置10分钟', image: '⏱️', tip: '静置更入味' }
+    ],
+    nutrition: { calories: 50, protein: 1, fat: 2, carbs: 4, benefit: '清爽开胃，低热量' },
+    tips: ['黄瓜要拍碎', '蒜末要多', '静置更入味'],
+    videoDuration: '3分钟'
+  },
+  {
+    id: 27,
+    name: '凉拌木耳',
+    icon: '🍄',
+    category: 'vegetable',
+    tags: ['清爽开胃', '健康养生', '简单'],
+    description: '清爽开胃，健康养生，简单易做',
+    time: '15分钟',
+    calories: '40卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '木耳', amount: '100g', icon: '🍄' },
+      { name: '蒜末', amount: '适量', icon: '🧄' },
+      { name: '醋', amount: '2勺', icon: '🫗' },
+      { name: '生抽', amount: '1勺', icon: '🫗' },
+      { name: '葱花', amount: '适量', icon: '🌿' }
+    ],
+    steps: [
+      { description: '木耳泡发，焯水2分钟', image: '🍄', tip: '泡发要充分' },
+      { description: '过凉水沥干', image: '❄️', tip: '过凉更爽脆' },
+      { description: '加入蒜末、醋、生抽', image: '🧄', tip: '调料要拌匀' },
+      { description: '撒上葱花即可', image: '🌿', tip: '可以加一点糖' }
+    ],
+    nutrition: { calories: 40, protein: 2, fat: 1, carbs: 3, benefit: '清爽开胃，健康养生' },
+    tips: ['木耳要泡发好', '焯水时间要短', '过凉更爽脆'],
+    videoDuration: '3分钟'
+  },
+  {
+    id: 28,
+    name: '葱油拌面',
+    icon: '🍜',
+    category: 'easy',
+    tags: ['简单快手', '香浓可口', '早餐'],
+    description: '简单快手，葱油香浓，面条劲道',
+    time: '10分钟',
+    calories: '200卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '面条', amount: '200g', icon: '🍜' },
+      { name: '葱', amount: '适量', icon: '🌿' },
+      { name: '生抽', amount: '2勺', icon: '🫗' },
+      { name: '老抽', amount: '1勺', icon: '🫗' },
+      { name: '白糖', amount: '1勺', icon: '🍬' }
+    ],
+    steps: [
+      { description: '面条煮熟，过凉水', image: '🍜', tip: '过凉更劲道' },
+      { description: '葱切段，锅中放油炸葱油', image: '🌿', tip: '炸到葱金黄' },
+      { description: '倒入生抽、老抽、白糖', image: '🫗', tip: '搅拌均匀' },
+      { description: '倒入面条，拌匀即可', image: '🥢', tip: '快速拌匀' }
+    ],
+    nutrition: { calories: 200, protein: 6, fat: 5, carbs: 30, benefit: '简单快手，香浓可口' },
+    tips: ['面条要过凉', '葱油要炸香', '调料要拌匀'],
+    videoDuration: '4分钟'
+  },
+  {
+    id: 29,
+    name: '炒面',
+    icon: '🍝',
+    category: 'easy',
+    tags: ['简单快手', '营养丰富', '主食'],
+    description: '简单快手，营养丰富，一碗搞定',
+    time: '15分钟',
+    calories: '250卡',
+    difficulty: '简单',
+    ingredients: [
+      { name: '面条', amount: '200g', icon: '🍜' },
+      { name: '鸡蛋', amount: '1个', icon: '🥚' },
+      { name: '青菜', amount: '适量', icon: '🥬' },
+      { name: '生抽', amount: '2勺', icon: '🫗' },
+      { name: '老抽', amount: '1勺', icon: '🫗' }
+    ],
+    steps: [
+      { description: '面条煮熟，过凉水沥干', image: '🍜', tip: '过凉更劲道' },
+      { description: '鸡蛋打散炒熟盛出', image: '🥚', tip: '炒成蛋花' },
+      { description: '青菜炒熟', image: '🥬', tip: '不要炒太久' },
+      { description: '放入面条，加生抽老抽', image: '🫗', tip: '快速翻炒' },
+      { description: '加入鸡蛋，翻炒均匀', image: '🥢', tip: '快速翻炒' }
+    ],
+    nutrition: { calories: 250, protein: 8, fat: 6, carbs: 35, benefit: '营养丰富，一碗搞定' },
+    tips: ['面条要过凉', '大火快炒', '配菜可自由搭配'],
+    videoDuration: '5分钟'
+  },
+  {
+    id: 30,
+    name: '番茄牛腩',
+    icon: '🥩',
+    category: 'meat',
+    tags: ['经典美味', '软烂入味', '下饭'],
+    description: '经典美味，牛腩软烂，番茄入味',
+    time: '90分钟',
+    calories: '300卡',
+    difficulty: '中等',
+    ingredients: [
+      { name: '牛腩', amount: '500g', icon: '🥩' },
+      { name: '西红柿', amount: '3个', icon: '🍅' },
+      { name: '胡萝卜', amount: '1根', icon: '🥕' },
+      { name: '土豆', amount: '1个', icon: '🥔' },
+      { name: '姜片', amount: '适量', icon: '🌿' }
+    ],
+    steps: [
+      { description: '牛腩切块，焯水去腥', image: '🥩', tip: '冷水下锅' },
+      { description: '西红柿切块', image: '🍅', tip: '可以去皮' },
+      { description: '锅中放油，炒西红柿出汁', image: '🍅', tip: '炒到软烂' },
+      { description: '加入牛腩和水，小火炖60分钟', image: '⏱️', tip: '小火慢炖' },
+      { description: '加入胡萝卜和土豆，再炖20分钟', image: '🥕🥔', tip: '炖至软烂' }
+    ],
+    nutrition: { calories: 300, protein: 20, fat: 15, carbs: 15, benefit: '蛋白质丰富，软烂入味' },
+    tips: ['牛腩要炖够时间', '西红柿要炒出汁', '土豆要后放'],
+    videoDuration: '12分钟'
+  }
+]
 
 const todayRecords = computed(() => {
   const todayStr = new Date().toDateString()
@@ -108,25 +1341,235 @@ const todayCalories = computed(() => {
   return todayRecords.value.reduce((sum, r) => sum + (r.calories || 0), 0)
 })
 
-const showAddMeal = (type) => { 
-  currentMealType.value = type 
-  showAddModal.value = true 
+const todayProtein = computed(() => {
+  return todayRecords.value.reduce((sum, r) => sum + (r.protein || 0), 0)
+})
+
+const todayFat = computed(() => {
+  return todayRecords.value.reduce((sum, r) => sum + (r.fat || 0), 0)
+})
+
+const todayCarbs = computed(() => {
+  return todayRecords.value.reduce((sum, r) => sum + (r.carbs || 0), 0)
+})
+
+const nutritionAdvice = computed(() => {
+  const calories = todayCalories.value
+  if (calories === 0) return '记录饮食后查看营养建议'
+  if (calories < 1000) return '今日摄入较少，建议适当增加营养'
+  if (calories < 1500) return '今日摄入适中，继续保持'
+  if (calories < 2000) return '今日摄入充足，注意均衡'
+  return '今日摄入较多，建议适当控制'
+})
+
+const filteredRecipes = computed(() => {
+  let recipes = [...recipeDatabase]
+  // 使用seed进行伪随机排序
+  recipes.sort((a, b) => {
+    const seed = recipeSeed.value || 1
+    const hashA = (a.id * seed) % 100
+    const hashB = (b.id * seed) % 100
+    return hashA - hashB
+  })
+  if (selectedRecipeCategory.value !== 'all') {
+    recipes = recipes.filter(r => r.category === selectedRecipeCategory.value || r.tags.includes(selectedRecipeCategory.value))
+  }
+  return recipes.slice(0, 5)
+})
+
+const showAddMeal = (type) => {
+  currentMealType.value = type
+  newFood.value = ''
+  selectedFoodInfo.value = null
+  showAddModal.value = true
+}
+
+const toggleVoiceInput = () => {
+  if (isVoiceInput.value) {
+    isVoiceInput.value = false
+    voiceAssistant.stopListening()
+    toast.success('语音输入已停止', 1500)
+  } else {
+    if (!voiceAssistant.isSupported()) {
+      toast.warning('您的浏览器不支持语音识别', 2000)
+      return
+    }
+    isVoiceInput.value = true
+    toast.info('开始语音输入，请说出您吃的食物...', 2000)
+    voiceAssistant.startListening()
+  }
+}
+
+const handleVoiceEvent = (event, data) => {
+  switch (event) {
+    case 'result':
+      parseFoodData(data)
+      break
+    case 'error':
+      isVoiceInput.value = false
+      if (data === 'browser-not-supported') {
+        toast.warning('您的浏览器不支持语音识别', 2000)
+      } else {
+        toast.warning('语音识别出错：' + data, 2000)
+      }
+      break
+    case 'end':
+      if (isVoiceInput.value) {
+        isVoiceInput.value = false
+        toast.success('语音输入已完成', 1500)
+      }
+      break
+  }
+}
+
+const parseFoodData = (text) => {
+  if (!text) return
+  
+  // 解析食物名称和数量
+  const patterns = [
+    /一碗(.+)/,
+    /两碗(.+)/,
+    /一个(.+)/,
+    /两个(.+)/,
+    /一杯(.+)/,
+    /吃了(.+)/,
+    /(.+)一碗/,
+    /(.+)一个/,
+    /(.+)一杯/
+  ]
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern)
+    if (match) {
+      newFood.value = match[1]
+      // 查找营养信息
+      const foodInfo = nutritionDatabase.find(f => f.name.includes(match[1]) || match[1].includes(f.name))
+      if (foodInfo) {
+        selectedFoodInfo.value = foodInfo
+        toast.success(`识别到：${match[1]}，热量${foodInfo.calories}卡`, 2000)
+      } else {
+        toast.success(`识别到：${match[1]}`, 2000)
+      }
+      return
+    }
+  }
+  
+  // 直接匹配食物名称
+  for (const food of nutritionDatabase) {
+    if (text.includes(food.name)) {
+      newFood.value = food.name
+      selectedFoodInfo.value = food
+      toast.success(`识别到：${food.name}，热量${food.calories}卡`, 2000)
+      return
+    }
+  }
+  
+  // 如果没有匹配到，直接使用原文
+  newFood.value = text
+  toast.success(`识别到：${text}`, 2000)
+}
+
+const quickAddFood = (food) => {
+  newFood.value = food.name
+  selectedFoodInfo.value = food
+}
+
+const selectFood = (food) => {
+  newFood.value = food.name
+  selectedFoodInfo.value = food
+  showAddModal.value = true
 }
 
 const addFood = () => {
   if (newFood.value.trim()) {
+    const foodInfo = selectedFoodInfo.value || nutritionDatabase.find(f => f.name === newFood.value)
     store.addDietRecord({
       mealType: mealTypes[currentMealType.value].name,
       content: newFood.value.trim(),
-      calories: 0,
+      calories: foodInfo?.calories || 0,
+      protein: foodInfo?.protein || 0,
+      fat: foodInfo?.fat || 0,
+      carbs: foodInfo?.carbs || 0,
       timestamp: new Date().toISOString()
     })
     newFood.value = ''
+    selectedFoodInfo.value = null
     showAddModal.value = false
+    toast.success('食物已添加', 1500)
   }
+}
+
+const searchFood = () => {
+  if (!foodSearchQuery.value.trim()) {
+    searchedFoods.value = []
+    return
+  }
+  searchedFoods.value = nutritionDatabase.filter(f => 
+    f.name.includes(foodSearchQuery.value) || 
+    f.category.includes(foodSearchQuery.value)
+  )
+}
+
+const filterByCategory = (cat) => {
+  foodSearchQuery.value = cat
+  searchFood()
+}
+
+const searchRecipes = () => {
+  showRecipeSearchModal.value = true
+  recipeSearchQuery.value = ''
+  recipeSearchResults.value = []
+}
+
+const refreshRecipes = () => {
+  recipeSeed.value = Math.floor(Math.random() * 1000) + 1
+  selectedRecipeCategory.value = 'all'
+  toast.success('菜谱已刷新', 1500)
+}
+
+const viewRecipe = (recipe) => {
+  currentRecipe.value = recipe
+  showRecipeDetailModal.value = true
+}
+
+const closeRecipeModal = () => {
+  if (isSpeaking.value) {
+    voiceAssistant.stopSpeaking()
+    isSpeaking.value = false
+  }
+  showRecipeDetailModal.value = false
+}
+
+const isSpeaking = ref(false)
+
+const speakRecipe = () => {
+  if (!currentRecipe.value) return
+  
+  if (isSpeaking.value) {
+    voiceAssistant.stopSpeaking()
+    isSpeaking.value = false
+    toast.info('已停止播报', 1000)
+  } else {
+    const text = `${currentRecipe.value.name}，${currentRecipe.value.description}。制作时间${currentRecipe.value.time}，难度${currentRecipe.value.difficulty}。`
+    voiceAssistant.speak(text)
+    isSpeaking.value = true
+    toast.success('正在播报菜谱信息...', 1500)
+  }
+}
+
+const playVideo = () => {
+  toast.info(`正在播放${currentRecipe.value?.name}制作教程视频...`, 2000)
 }
 
 onMounted(() => {
   store.loadDietRecords()
+  voiceAssistant.addCallback(handleVoiceEvent)
+})
+
+onUnmounted(() => {
+  voiceAssistant.removeCallback(handleVoiceEvent)
+  voiceAssistant.stopListening()
+  voiceAssistant.stopSpeaking()
+  isVoiceInput.value = false
 })
 </script>

@@ -1,16 +1,60 @@
 <template>
-  <div class="px-4 py-4 max-w-md mx-auto pb-24">
+  <div class="px-4 py-4 w-full max-w-lg mx-auto pb-24">
     <div class="bg-gradient-to-br from-parent to-parent-hover rounded-2xl p-4 text-white mb-4 shadow-md">
       <div class="flex items-center justify-between mb-3">
-        <div>
-          <p class="text-white/80 text-sm">{{ greeting }}</p>
-          <h1 class="text-2xl font-bold">🌅 夕阳智语</h1>
+        <div class="min-w-0 flex-1">
+          <p class="text-white/80 text-sm truncate">{{ greeting }}，{{ userName }}</p>
+          <h1 class="text-xl font-bold mt-1 whitespace-nowrap">{{ weatherData.current.icon }} 夕阳智语</h1>
         </div>
-        <router-link to="/realname" class="cursor-pointer hover:scale-105 transition-transform">
+        <router-link to="/realname" class="cursor-pointer hover:scale-105 transition-transform flex-shrink-0 ml-3">
           <UserAvatar role="parent" size="lg" />
         </router-link>
       </div>
-      <p class="text-white/70 text-xs">SunsetAI — 您的智能语音健康伴侣</p>
+
+      <div class="bg-white/10 rounded-xl p-3">
+        <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-2xl flex-shrink-0">{{ weatherData.current.icon }}</span>
+            <div class="flex items-baseline gap-1 min-w-0">
+              <span class="text-xl font-bold">{{ weatherData.current.temp }}°</span>
+              <span class="text-sm">{{ weatherData.current.condition }}</span>
+            </div>
+            <span class="text-xs text-white/70 flex-shrink-0">{{ weatherData.city }}</span>
+          </div>
+          <button @click="toggleWeatherExpand" class="text-white/80 hover:text-white text-xs flex items-center gap-1 flex-shrink-0 ml-2">
+            <span class="hidden sm:inline">{{ isWeatherExpanded ? '收起' : '展开' }}</span>
+            <span>{{ isWeatherExpanded ? '▾' : '▴' }}</span>
+          </button>
+        </div>
+
+        <div v-if="isWeatherExpanded" class="space-y-2 mt-3">
+          <div class="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+            <span>湿度 {{ weatherData.current.humidity }}%</span>
+            <span>{{ weatherData.current.wind }}</span>
+            <span>紫外线 {{ weatherData.current.uv }}</span>
+            <span>空气 {{ weatherData.current.airQuality }}</span>
+          </div>
+          <div class="bg-white/10 rounded-lg p-2">
+            <p class="text-xs font-medium">🚶 出行建议：{{ weatherData.suggestion }}</p>
+          </div>
+          <div class="flex gap-2">
+            <button @click="searchWeather" class="flex-1 bg-white/20 hover:bg-white/30 rounded-lg py-1.5 text-xs flex items-center justify-center gap-1 transition-colors">
+              🔍 城市
+            </button>
+            <button @click="speakWeather" class="flex-1 bg-white/20 hover:bg-white/30 rounded-lg py-1.5 text-xs flex items-center justify-center gap-1 transition-colors">
+              {{ isSpeakingWeather ? '⏹️ 停止' : '🔊 播报' }}
+            </button>
+          </div>
+        </div>
+
+        <div class="flex justify-around mt-2 pt-2 border-t border-white/10">
+          <div v-for="day in weatherData.forecast.slice(0, 2)" :key="day.day" class="text-center px-2">
+            <p class="text-xs text-white/70">{{ day.day }}</p>
+            <p class="text-lg">{{ day.icon }}</p>
+            <p class="text-xs">{{ day.high }}°/{{ day.low }}°</p>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- 功能入口 2×3 网格 (6项，不含紧急求助) -->
@@ -157,46 +201,94 @@
     <div v-if="showHelp" class="fixed inset-0 bg-black/50 z-50 flex items-end justify-center" @click.self="showHelp = false">
       <div class="bg-white w-full max-w-md rounded-t-2xl p-4 animate-slide-up">
         <div class="flex items-center justify-between mb-4">
-          <h4 class="text-lg font-bold text-gray-800">🎤 语音小助手功能</h4>
+          <h4 class="text-lg font-bold text-gray-800">🎤 语音小助手</h4>
           <button @click="showHelp = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
         </div>
-        <div class="grid grid-cols-2 gap-3">
+        <div class="space-y-3">
           <div class="bg-orange-50 rounded-lg p-3">
-            <p class="text-sm font-bold text-orange-600 mb-1">健康相关</p>
+            <p class="text-sm font-bold text-orange-600 mb-2">🏥 健康相关</p>
             <ul class="text-xs text-gray-600 space-y-0.5">
-              <li>• 打开健康</li>
-              <li>• 查看健康数据</li>
-              <li>• 健康监测</li>
+              <li>• 打开健康、查看健康、健康监测</li>
+              <li>• 体检、身体、血压、血糖</li>
             </ul>
           </div>
           <div class="bg-purple-50 rounded-lg p-3">
-            <p class="text-sm font-bold text-purple-600 mb-1">用药相关</p>
+            <p class="text-sm font-bold text-purple-600 mb-2">💊 用药相关</p>
             <ul class="text-xs text-gray-600 space-y-0.5">
-              <li>• 打开用药</li>
-              <li>• 吃药</li>
-              <li>• 用药提醒</li>
+              <li>• 打开用药、吃药、服药、药</li>
+              <li>• 药品、药剂、胶囊、药片</li>
             </ul>
           </div>
           <div class="bg-blue-50 rounded-lg p-3">
-            <p class="text-sm font-bold text-blue-600 mb-1">回忆录</p>
+            <p class="text-sm font-bold text-blue-600 mb-2">📖 回忆录</p>
             <ul class="text-xs text-gray-600 space-y-0.5">
-              <li>• 打开回忆</li>
-              <li>• 回忆录</li>
-              <li>• 故事</li>
+              <li>• 打开回忆、回忆录、故事</li>
+              <li>• 往事、记忆、纪念、照片</li>
+            </ul>
+          </div>
+          <div class="bg-orange-50 rounded-lg p-3">
+            <p class="text-sm font-bold text-orange-600 mb-2">🍽️ 饮食管理</p>
+            <ul class="text-xs text-gray-600 space-y-0.5">
+              <li>• 打开饮食、吃饭、吃什么</li>
+              <li>• 餐、菜谱、食谱、营养</li>
             </ul>
           </div>
           <div class="bg-green-50 rounded-lg p-3">
-            <p class="text-sm font-bold text-green-600 mb-1">其他功能</p>
+            <p class="text-sm font-bold text-green-600 mb-2">✅ 平安签到</p>
             <ul class="text-xs text-gray-600 space-y-0.5">
-              <li>• 签到</li>
-              <li>• 求助</li>
-              <li>• 打开饮食</li>
+              <li>• 签到、平安签到、平安</li>
+              <li>• 打卡、报平安、报个平安</li>
             </ul>
           </div>
+          <div class="bg-pink-50 rounded-lg p-3">
+            <p class="text-sm font-bold text-pink-600 mb-2">👨‍👩‍👧 亲情连接</p>
+            <ul class="text-xs text-gray-600 space-y-0.5">
+              <li>• 家人、亲情、子女、孩子</li>
+              <li>• 联系、连接、家庭</li>
+            </ul>
+          </div>
+          <div class="bg-indigo-50 rounded-lg p-3">
+            <p class="text-sm font-bold text-indigo-600 mb-2">📅 日程提醒</p>
+            <ul class="text-xs text-gray-600 space-y-0.5">
+              <li>• 日程、日历、提醒、安排</li>
+              <li>• 计划、时间、约会</li>
+            </ul>
+          </div>
+          <div class="bg-red-50 rounded-lg p-3">
+            <p class="text-sm font-bold text-red-600 mb-2">🚨 紧急求助</p>
+            <ul class="text-xs text-gray-600 space-y-0.5">
+              <li>• 求助、紧急、救命</li>
+              <li>• 不舒服、难受、帮忙</li>
+            </ul>
+          </div>
+        </div>
+        <div class="mt-3 bg-gray-50 rounded-lg p-3 text-xs text-gray-500">
+          <p class="font-medium mb-1">💡 温馨提示</p>
+          <p>支持普通话和部分方言，您可以在设置中切换语言。识别时尽量清晰、缓慢地说话，效果更好。</p>
         </div>
         <button @click="showHelp = false" class="w-full mt-4 bg-parent text-white py-2 rounded-xl font-bold hover:bg-parent-hover transition-colors">
           我知道了
         </button>
+      </div>
+    </div>
+
+    <div v-if="showCitySearch" class="fixed inset-0 bg-black/50 z-50 flex items-end justify-center" @click.self="showCitySearch = false">
+      <div class="bg-white w-full max-w-md rounded-t-2xl p-4 animate-slide-up">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-lg font-bold text-gray-800">🔍 搜索城市</h4>
+          <button @click="showCitySearch = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <input v-model="citySearchQuery" type="text" placeholder="输入城市名称..." class="w-full px-4 py-3 bg-gray-100 rounded-xl text-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <div class="grid grid-cols-3 gap-2">
+          <button v-for="city in cityList" :key="city" @click="getCityWeather(city)" class="bg-blue-50 text-blue-600 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
+            {{ city }}
+          </button>
+        </div>
+        <div v-if="citySearchQuery" class="mt-4">
+          <button @click="getCityWeather(citySearchQuery)" class="w-full bg-blue-500 text-white py-2 rounded-xl font-bold hover:bg-blue-600 transition-colors">
+            查询 {{ citySearchQuery }} 天气
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -210,7 +302,7 @@ import { useToastStore } from '../stores/toastStore'
 import AppIcon from '../components/AppIcon.vue'
 import UserAvatar from '../components/UserAvatar.vue'
 import { HeartIcon, DeviceTabletIcon, BookOpenIcon, ReceiptPercentIcon, CheckCircleIcon, UsersIcon, CalendarDaysIcon, ExclamationTriangleIcon, PhoneIcon, QuestionMarkCircleIcon } from '@heroicons/vue/24/solid'
-import { voiceAssistant } from '../utils/voiceAssistant'
+import { voiceAssistant, fuzzyMatch, getVoiceCommands } from '../utils/voiceAssistant'
 
 const router = useRouter()
 const store = useAppStore()
@@ -222,6 +314,40 @@ const isSpeaking = ref(false)
 const recognizedText = ref('')
 const showHelp = ref(false)
 const voiceSupported = ref(true)
+const isWeatherExpanded = ref(false)
+const showCitySearch = ref(false)
+const citySearchQuery = ref('')
+const isSpeakingWeather = ref(false)
+
+const userName = computed(() => {
+  const info = store.realNameInfo
+  if (info && info.name) {
+    return info.name
+  }
+  return '用户***'
+})
+
+const weatherData = ref({
+  city: '北京',
+  current: {
+    icon: '☀️',
+    temp: 28,
+    condition: '晴',
+    humidity: 65,
+    wind: '东南风3级',
+    uv: '中等',
+    airQuality: '优'
+  },
+  forecast: [
+    { day: '今天', icon: '☀️', high: 30, low: 22 },
+    { day: '明天', icon: '⛅', high: 29, low: 21 },
+    { day: '后天', icon: '🌧️', high: 25, low: 19 },
+    { day: '周五', icon: '☁️', high: 27, low: 20 },
+    { day: '周六', icon: '☀️', high: 31, low: 23 }
+  ],
+  tips: '今日紫外线中等，外出建议涂防晒霜。气温适宜，但早晚温差较大，请注意增减衣物。',
+  suggestion: '适合户外活动，建议上午10点前或下午4点后外出。如果有晨练习惯，可以正常进行。'
+})
 
 const hour = new Date().getHours()
 const greeting = computed(() => {
@@ -322,40 +448,6 @@ const mainFeatureCards = [
   { icon: 'Users', title: '家人', desc: '连接', route: '/family', color: 'text-pink-500', bgColor: 'bg-pink-100' }
 ]
 
-const voiceCommands = {
-  '健康': '/health',
-  '打开健康': '/health',
-  '查看健康': '/health',
-  '健康监测': '/health',
-  '用药': '/medicine',
-  '打开用药': '/medicine',
-  '吃药': '/medicine',
-  '药': '/medicine',
-  '回忆': '/memories',
-  '打开回忆': '/memories',
-  '回忆录': '/memories',
-  '故事': '/memories',
-  '饮食': '/diet',
-  '打开饮食': '/diet',
-  '吃饭': '/diet',
-  '吃什么': '/diet',
-  '签到': '/safety',
-  '平安签到': '/safety',
-  '安全': '/safety',
-  '家人': '/family',
-  '亲情': '/family',
-  '子女': '/family',
-  '连接': '/family',
-  '日程': '/schedule',
-  '日历': '/schedule',
-  '提醒': '/schedule',
-  '求助': '/sos',
-  '紧急': '/sos',
-  '救命': '/sos',
-  '不舒服': '/sos',
-  '难受': '/sos'
-}
-
 const handleSignIn = () => {
   store.addSignInRecord({ type: 'manual' })
   toast.success('✅ 签到成功！', 2000)
@@ -364,7 +456,10 @@ const handleSignIn = () => {
 const handleVoiceResult = (text) => {
   recognizedText.value = `您说：${text}`
 
-  if (text.includes('签到')) {
+  const commands = getVoiceCommands()
+  const match = fuzzyMatch(text, commands)
+
+  if (text.includes('签到') || text.includes('打卡') || text.includes('平安')) {
     handleSignIn()
     isSpeaking.value = true
     voiceAssistant.speak('签到成功')
@@ -374,27 +469,25 @@ const handleVoiceResult = (text) => {
     return
   }
 
-  for (const [command, route] of Object.entries(voiceCommands)) {
-    if (text.includes(command)) {
-      isSpeaking.value = true
-      const responses = {
-        '/health': '好的，为您打开健康监测页面',
-        '/medicine': '好的，为您打开用药提醒页面',
-        '/memories': '好的，为您打开回忆录页面',
-        '/diet': '好的，为您打开饮食管理页面',
-        '/safety': '好的，为您打开平安签到页面',
-        '/family': '好的，为您打开亲情连接页面',
-        '/schedule': '好的，为您打开日程提醒页面',
-        '/sos': '别担心，我马上帮您联系家人'
-      }
-      const response = responses[route] || `好的，为您打开${command}页面`
-      voiceAssistant.speak(response)
-      setTimeout(() => {
-        router.push(route)
-        isSpeaking.value = false
-      }, 1500)
-      return
+  if (match.matched) {
+    isSpeaking.value = true
+    const responses = {
+      '/health': '好的，为您打开健康监测页面',
+      '/medicine': '好的，为您打开用药提醒页面',
+      '/memories': '好的，为您打开回忆录页面',
+      '/diet': '好的，为您打开饮食管理页面',
+      '/safety': '好的，为您打开平安签到页面',
+      '/family': '好的，为您打开亲情连接页面',
+      '/schedule': '好的，为您打开日程提醒页面',
+      '/sos': '别担心，我马上帮您联系家人'
     }
+    const response = responses[match.route] || `好的，为您打开${match.command}页面`
+    voiceAssistant.speak(response)
+    setTimeout(() => {
+      router.push(match.route)
+      isSpeaking.value = false
+    }, 1500)
+    return
   }
 
   isSpeaking.value = true
@@ -450,6 +543,75 @@ const goToPage = (route) => {
   router.push(route)
 }
 
+const toggleWeatherExpand = () => {
+  isWeatherExpanded.value = !isWeatherExpanded.value
+}
+
+const speakWeather = () => {
+  if (isSpeakingWeather.value) {
+    voiceAssistant.stopSpeaking()
+    isSpeakingWeather.value = false
+    return
+  }
+  const w = weatherData.value
+  const text = `${w.city}今天${w.current.condition}，温度${w.current.temp}度，湿度${w.current.humidity}%。${w.tips}。出行建议：${w.suggestion}`
+  voiceAssistant.speak(text)
+  isSpeakingWeather.value = true
+  toast.success('正在播报天气信息...', 1500)
+}
+
+const searchWeather = () => {
+  showCitySearch.value = true
+}
+
+const getCityWeather = (city) => {
+  const cityWeatherData = {
+    '北京': {
+      current: { icon: '☀️', temp: 28, condition: '晴', humidity: 65, wind: '东南风3级', uv: '中等', airQuality: '优' },
+      forecast: [{ day: '今天', icon: '☀️', high: 30, low: 22 }, { day: '明天', icon: '⛅', high: 29, low: 21 }, { day: '后天', icon: '🌧️', high: 25, low: 19 }, { day: '周五', icon: '☁️', high: 27, low: 20 }, { day: '周六', icon: '☀️', high: 31, low: 23 }],
+      tips: '今日紫外线中等，外出建议涂防晒霜。气温适宜，但早晚温差较大，请注意增减衣物。',
+      suggestion: '适合户外活动，建议上午10点前或下午4点后外出。如果有晨练习惯，可以正常进行。'
+    },
+    '上海': {
+      current: { icon: '⛅', temp: 30, condition: '多云', humidity: 80, wind: '东风2级', uv: '较弱', airQuality: '良' },
+      forecast: [{ day: '今天', icon: '⛅', high: 32, low: 25 }, { day: '明天', icon: '🌧️', high: 28, low: 24 }, { day: '后天', icon: '🌧️', high: 26, low: 23 }, { day: '周五', icon: '☁️', high: 29, low: 24 }, { day: '周六', icon: '☀️', high: 31, low: 25 }],
+      tips: '今日湿度较高，注意防暑降温。未来两天有降雨，出门记得带伞。',
+      suggestion: '今天适合室内活动，避免午后高温时段外出。明天出门请携带雨具。'
+    },
+    '广州': {
+      current: { icon: '🌧️', temp: 26, condition: '小雨', humidity: 90, wind: '南风3级', uv: '弱', airQuality: '优' },
+      forecast: [{ day: '今天', icon: '🌧️', high: 28, low: 24 }, { day: '明天', icon: '☔', high: 27, low: 24 }, { day: '后天', icon: '⛅', high: 29, low: 25 }, { day: '周五', icon: '☀️', high: 32, low: 26 }, { day: '周六', icon: '☀️', high: 33, low: 27 }],
+      tips: '今日有小雨，路面湿滑，出门请慢行。空气湿度大，注意防潮防霉。',
+      suggestion: '出门请携带雨伞，穿防滑鞋。不适合晨练，建议在室内活动。'
+    },
+    '深圳': {
+      current: { icon: '☁️', temp: 27, condition: '阴天', humidity: 85, wind: '东北风2级', uv: '弱', airQuality: '良' },
+      forecast: [{ day: '今天', icon: '☁️', high: 29, low: 25 }, { day: '明天', icon: '🌧️', high: 28, low: 24 }, { day: '后天', icon: '☔', high: 26, low: 23 }, { day: '周五', icon: '⛅', high: 28, low: 24 }, { day: '周六', icon: '☀️', high: 30, low: 26 }],
+      tips: '今日天气阴凉，适合户外活动。但明天起有降雨，请提前做好准备。',
+      suggestion: '今天可以外出散步或买菜。明天出门请带伞，注意安全。'
+    },
+    '成都': {
+      current: { icon: '🌫️', temp: 24, condition: '雾霾', humidity: 75, wind: '无风', uv: '弱', airQuality: '差' },
+      forecast: [{ day: '今天', icon: '🌫️', high: 26, low: 19 }, { day: '明天', icon: '☁️', high: 25, low: 18 }, { day: '后天', icon: '☀️', high: 28, low: 20 }, { day: '周五', icon: '☀️', high: 30, low: 21 }, { day: '周六', icon: '⛅', high: 29, low: 20 }],
+      tips: '今日空气质量较差，建议减少外出。出门请佩戴口罩，做好防护。',
+      suggestion: '尽量待在室内，避免户外活动。可以在室内做一些简单的健身运动。'
+    },
+    '杭州': {
+      current: { icon: '☀️', temp: 32, condition: '晴', humidity: 55, wind: '西南风3级', uv: '强', airQuality: '优' },
+      forecast: [{ day: '今天', icon: '☀️', high: 34, low: 24 }, { day: '明天', icon: '☀️', high: 35, low: 25 }, { day: '后天', icon: '⛅', high: 33, low: 24 }, { day: '周五', icon: '🌧️', high: 29, low: 23 }, { day: '周六', icon: '☁️', high: 30, low: 24 }],
+      tips: '今日紫外线很强，外出请做好防晒措施。气温较高，注意防暑降温。',
+      suggestion: '避免中午11点到下午3点外出。可以选择早晨或傍晚出门散步。'
+    }
+  }
+  
+  const data = cityWeatherData[city] || cityWeatherData['北京']
+  weatherData.value = { ...weatherData.value, city, ...data }
+  showCitySearch.value = false
+  toast.success(`已切换到${city}天气`, 1500)
+}
+
+const cityList = ['北京', '上海', '广州', '深圳', '成都', '杭州']
+
 onMounted(() => {
   store.loadSignInRecords()
   store.loadDietRecords()
@@ -466,6 +628,9 @@ onMounted(() => {
 onUnmounted(() => {
   voiceAssistant.removeCallback(handleVoiceEvent)
   voiceAssistant.stopListening()
+  if (isSpeakingWeather.value) {
+    voiceAssistant.stopSpeaking()
+  }
 })
 </script>
 

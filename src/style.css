@@ -67,6 +67,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  writing-mode: horizontal-tb;
 }
 
 html {
@@ -80,6 +81,9 @@ body {
   min-height: 100vh;
   color: var(--color-text);
   line-height: 1.6;
+  overflow-x: hidden;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 button {

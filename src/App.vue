@@ -19,11 +19,7 @@
         </div>
       </nav>
       <main :class="isEntry ? '' : 'pb-20 md:pb-0 md:pt-16'">
-        <router-view v-slot="{ Component }">
-          <Transition name="page" mode="out-in">
-            <component :is="Component" />
-          </Transition>
-        </router-view>
+        <router-view />
       </main>
       <!-- 全局SOS悬浮按钮 - 仅在父母端非入口页面显示 -->
       <FabSOS v-if="isParentRoute && !isEntry" />

@@ -45,6 +45,52 @@
     </div>
 
     <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+      <h3 class="text-lg font-bold text-gray-700 mb-4">语音设置</h3>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-gray-600 text-sm mb-2">语言/方言</label>
+          <div class="grid grid-cols-2 gap-2">
+            <button 
+              v-for="lang in langOptions" 
+              :key="lang.code" 
+              @click="settings.language = lang.code" 
+              :class="settings.language === lang.code ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600'" 
+              class="py-2.5 rounded-lg text-sm font-medium transition-colors text-left px-3"
+            >
+              <div>{{ lang.name }}</div>
+              <div class="text-xs opacity-70">{{ lang.desc }}</div>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 语音测试 -->
+        <div class="bg-gray-50 rounded-lg p-4">
+          <h4 class="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
+            <span>🎤</span> 语音测试
+          </h4>
+          <button @click="testVoiceInput" 
+            :class="isTestingVoice ? 'bg-red-500 text-white animate-pulse' : 'bg-blue-500 text-white'"
+            class="w-full py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-all">
+            <span>{{ isTestingVoice ? '⏹️' : '🎤' }}</span>
+            {{ isTestingVoice ? '停止测试' : '测试语音识别' }}
+          </button>
+          <div v-if="testResult" class="mt-3 p-3 bg-white rounded-lg">
+            <p class="text-sm text-gray-600">识别结果：</p>
+            <p class="text-lg font-medium text-gray-800 mt-1">{{ testResult }}</p>
+          </div>
+          <p v-if="isTestingVoice" class="text-xs text-blue-500 mt-2 animate-pulse">
+            请说出任意内容进行测试...
+          </p>
+        </div>
+        
+        <div class="text-xs text-gray-400 bg-gray-50 p-3 rounded-lg">
+          <p class="mb-1">💡 提示：</p>
+          <p>不同设备支持的方言可能不同，建议使用普通话以获得最佳识别效果。</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-6 mb-6">
       <h3 class="text-lg font-bold text-gray-700 mb-4">账号设置</h3>
       <div class="space-y-3">
         <div class="flex items-center justify-between py-2 border-b">
@@ -77,13 +123,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '../stores/appStore'
 import AppIcon from '../components/AppIcon.vue'
+import { voiceAssistant } from '../utils/voiceAssistant'
 
 const router = useRouter()
 const store = useAppStore()
+
+const isTestingVoice = ref(false)
+const testResult = ref('')
 
 const fontSizes = [
   { label: '小', value: 'small' },
@@ -92,10 +142,13 @@ const fontSizes = [
   { label: '特大', value: 'xlarge' }
 ]
 
+const langOptions = voiceAssistant.getLangOptions()
+
 const settings = ref({
   fontSize: 'medium',
   volume: 80,
-  voiceEnabled: true
+  voiceEnabled: true,
+  language: 'zh-CN'
 })
 
 const username = computed(() => store.userProfile?.username || store.loginStatus?.username || '用户')
@@ -107,8 +160,11 @@ const saveSettings = () => {
   // 立即应用字体大小
   document.documentElement.className = 'font-' + settings.value.fontSize
   
+  // 立即应用语言设置
+  voiceAssistant.setLang(settings.value.language)
+  
   // 提示用户
-  alert('设置已保存，字体大小已更新！')
+  alert('设置已保存！')
   
   // 跳转到主页（不刷新页面）
   const role = store.loginStatus?.role || ''
@@ -142,8 +198,59 @@ onMounted(() => {
     settings.value = {
       fontSize: store.appSettings.fontSize || 'medium',
       volume: store.appSettings.volume || 80,
-      voiceEnabled: store.appSettings.voiceEnabled !== false
+      voiceEnabled: store.appSettings.voiceEnabled !== false,
+      language: store.appSettings.language || 'zh-CN'
     }
   }
+  
+  voiceAssistant.addCallback(handleVoiceTestEvent)
 })
+
+onUnmounted(() => {
+  voiceAssistant.removeCallback(handleVoiceTestEvent)
+  voiceAssistant.stopListening()
+  isTestingVoice.value = false
+})
+
+const testVoiceInput = () => {
+  if (isTestingVoice.value) {
+    isTestingVoice.value = false
+    voiceAssistant.stopListening()
+  } else {
+    if (!voiceAssistant.isSupported()) {
+      testResult.value = '您的浏览器不支持语音识别'
+      return
+    }
+    // 先应用当前选择的语言
+    voiceAssistant.setLang(settings.value.language)
+    isTestingVoice.value = true
+    testResult.value = ''
+    voiceAssistant.startListening()
+  }
+}
+
+const handleVoiceTestEvent = (event, data) => {
+  switch (event) {
+    case 'result':
+      testResult.value = data
+      isTestingVoice.value = false
+      break
+    case 'error':
+      isTestingVoice.value = false
+      if (data === 'browser-not-supported') {
+        testResult.value = '您的浏览器不支持语音识别'
+      } else {
+        testResult.value = '语音识别出错：' + data
+      }
+      break
+    case 'end':
+      if (isTestingVoice.value) {
+        isTestingVoice.value = false
+        if (!testResult.value) {
+          testResult.value = '未检测到语音输入'
+        }
+      }
+      break
+  }
+}
 </script>

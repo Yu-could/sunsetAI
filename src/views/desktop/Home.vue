@@ -13,6 +13,59 @@
       </div>
     </div>
 
+    <div class="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl shadow-md p-5 mb-6 text-white">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="text-5xl">{{ weatherData.current.icon }}</div>
+          <div>
+            <div class="flex items-center gap-3">
+              <span class="text-4xl font-bold">{{ weatherData.current.temp }}°</span>
+              <span class="text-xl">{{ weatherData.current.condition }}</span>
+            </div>
+            <p class="text-white/80 text-sm mt-1">{{ weatherData.city }} | 湿度 {{ weatherData.current.humidity }}% | {{ weatherData.current.wind }}</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button @click="toggleWeatherExpand" class="text-white/80 hover:text-white text-sm">
+            {{ isWeatherExpanded ? '收起' : '展开' }}
+          </button>
+          <button @click="speakWeather" class="bg-white/20 hover:bg-white/30 rounded-lg px-4 py-2 text-sm flex items-center gap-1 transition-colors">
+            🔊 语音播报
+          </button>
+          <button @click="searchWeather" class="bg-white text-blue-500 rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-50 transition-colors">
+            🔍 搜索城市
+          </button>
+        </div>
+      </div>
+
+      <div v-if="isWeatherExpanded" class="mt-4 grid grid-cols-4 gap-4">
+        <div class="bg-white/10 rounded-lg p-3">
+          <p class="text-xs text-white/70">紫外线指数</p>
+          <p class="text-sm font-medium">{{ weatherData.current.uv }}</p>
+        </div>
+        <div class="bg-white/10 rounded-lg p-3">
+          <p class="text-xs text-white/70">空气质量</p>
+          <p class="text-sm font-medium">{{ weatherData.current.airQuality }}</p>
+        </div>
+        <div class="bg-white/10 rounded-lg p-3">
+          <p class="text-xs text-white/70 mb-1">📋 注意事项</p>
+          <p class="text-xs text-white/90">{{ weatherData.tips }}</p>
+        </div>
+        <div class="bg-white/10 rounded-lg p-3">
+          <p class="text-xs text-white/70 mb-1">🚶 出行建议</p>
+          <p class="text-xs text-white/90">{{ weatherData.suggestion }}</p>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-6 mt-4">
+        <div v-for="day in weatherData.forecast" :key="day.day" class="text-center">
+          <p class="text-xs text-white/70">{{ day.day }}</p>
+          <p class="text-xl">{{ day.icon }}</p>
+          <p class="text-xs">{{ day.high }}°/{{ day.low }}°</p>
+        </div>
+      </div>
+    </div>
+
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
       <div class="bg-white rounded-xl shadow-sm p-4">
         <div class="flex items-center justify-between">
@@ -248,6 +301,26 @@
         <p class="text-xs">开始使用后会显示在这里</p>
       </div>
     </div>
+
+    <div v-if="showCitySearch" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center" @click.self="showCitySearch = false">
+      <div class="bg-white w-full max-w-md rounded-2xl p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="text-lg font-bold text-gray-800">🔍 搜索城市</h4>
+          <button @click="showCitySearch = false" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+        </div>
+        <input v-model="citySearchQuery" type="text" placeholder="输入城市名称..." class="w-full px-4 py-3 bg-gray-100 rounded-xl text-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <div class="grid grid-cols-3 gap-2">
+          <button v-for="city in cityList" :key="city" @click="getCityWeather(city)" class="bg-blue-50 text-blue-600 py-2 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors">
+            {{ city }}
+          </button>
+        </div>
+        <div v-if="citySearchQuery" class="mt-4">
+          <button @click="getCityWeather(citySearchQuery)" class="w-full bg-blue-500 text-white py-2 rounded-xl font-bold hover:bg-blue-600 transition-colors">
+            查询 {{ citySearchQuery }} 天气
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -260,6 +333,32 @@ import UserAvatar from '../../components/UserAvatar.vue'
 
 const router = useRouter()
 const store = useAppStore()
+
+const isWeatherExpanded = ref(false)
+const showCitySearch = ref(false)
+const citySearchQuery = ref('')
+
+const weatherData = ref({
+  city: '北京',
+  current: {
+    icon: '☀️',
+    temp: 28,
+    condition: '晴',
+    humidity: 65,
+    wind: '东南风3级',
+    uv: '中等',
+    airQuality: '优'
+  },
+  forecast: [
+    { day: '今天', icon: '☀️', high: 30, low: 22 },
+    { day: '明天', icon: '⛅', high: 29, low: 21 },
+    { day: '后天', icon: '🌧️', high: 25, low: 19 },
+    { day: '周五', icon: '☁️', high: 27, low: 20 },
+    { day: '周六', icon: '☀️', high: 31, low: 23 }
+  ],
+  tips: '今日紫外线中等，外出建议涂防晒霜。气温适宜，但早晚温差较大，请注意增减衣物。',
+  suggestion: '适合户外活动，建议上午10点前或下午4点后外出。如果有晨练习惯，可以正常进行。'
+})
 
 const hour = new Date().getHours()
 const greeting = computed(() => {
@@ -332,6 +431,69 @@ const allActivities = computed(() => {
   })
   return activities.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
 })
+
+const toggleWeatherExpand = () => {
+  isWeatherExpanded.value = !isWeatherExpanded.value
+}
+
+const speakWeather = () => {
+  import('../../utils/voiceAssistant').then(({ voiceAssistant }) => {
+    const w = weatherData.value
+    const text = `${w.city}今天${w.current.condition}，温度${w.current.temp}度，湿度${w.current.humidity}%。${w.tips}。出行建议：${w.suggestion}`
+    voiceAssistant.speak(text)
+  })
+}
+
+const searchWeather = () => {
+  showCitySearch.value = true
+}
+
+const getCityWeather = (city) => {
+  const cityWeatherData = {
+    '北京': {
+      current: { icon: '☀️', temp: 28, condition: '晴', humidity: 65, wind: '东南风3级', uv: '中等', airQuality: '优' },
+      forecast: [{ day: '今天', icon: '☀️', high: 30, low: 22 }, { day: '明天', icon: '⛅', high: 29, low: 21 }, { day: '后天', icon: '🌧️', high: 25, low: 19 }, { day: '周五', icon: '☁️', high: 27, low: 20 }, { day: '周六', icon: '☀️', high: 31, low: 23 }],
+      tips: '今日紫外线中等，外出建议涂防晒霜。气温适宜，但早晚温差较大，请注意增减衣物。',
+      suggestion: '适合户外活动，建议上午10点前或下午4点后外出。如果有晨练习惯，可以正常进行。'
+    },
+    '上海': {
+      current: { icon: '⛅', temp: 30, condition: '多云', humidity: 80, wind: '东风2级', uv: '较弱', airQuality: '良' },
+      forecast: [{ day: '今天', icon: '⛅', high: 32, low: 25 }, { day: '明天', icon: '🌧️', high: 28, low: 24 }, { day: '后天', icon: '🌧️', high: 26, low: 23 }, { day: '周五', icon: '☁️', high: 29, low: 24 }, { day: '周六', icon: '☀️', high: 31, low: 25 }],
+      tips: '今日湿度较高，注意防暑降温。未来两天有降雨，出门记得带伞。',
+      suggestion: '今天适合室内活动，避免午后高温时段外出。明天出门请携带雨具。'
+    },
+    '广州': {
+      current: { icon: '🌧️', temp: 26, condition: '小雨', humidity: 90, wind: '南风3级', uv: '弱', airQuality: '优' },
+      forecast: [{ day: '今天', icon: '🌧️', high: 28, low: 24 }, { day: '明天', icon: '☔', high: 27, low: 24 }, { day: '后天', icon: '⛅', high: 29, low: 25 }, { day: '周五', icon: '☀️', high: 32, low: 26 }, { day: '周六', icon: '☀️', high: 33, low: 27 }],
+      tips: '今日有小雨，路面湿滑，出门请慢行。空气湿度大，注意防潮防霉。',
+      suggestion: '出门请携带雨伞，穿防滑鞋。不适合晨练，建议在室内活动。'
+    },
+    '深圳': {
+      current: { icon: '☁️', temp: 27, condition: '阴天', humidity: 85, wind: '东北风2级', uv: '弱', airQuality: '良' },
+      forecast: [{ day: '今天', icon: '☁️', high: 29, low: 25 }, { day: '明天', icon: '🌧️', high: 28, low: 24 }, { day: '后天', icon: '☔', high: 26, low: 23 }, { day: '周五', icon: '⛅', high: 28, low: 24 }, { day: '周六', icon: '☀️', high: 30, low: 26 }],
+      tips: '今日天气阴凉，适合户外活动。但明天起有降雨，请提前做好准备。',
+      suggestion: '今天可以外出散步或买菜。明天出门请带伞，注意安全。'
+    },
+    '成都': {
+      current: { icon: '🌫️', temp: 24, condition: '雾霾', humidity: 75, wind: '无风', uv: '弱', airQuality: '差' },
+      forecast: [{ day: '今天', icon: '🌫️', high: 26, low: 19 }, { day: '明天', icon: '☁️', high: 25, low: 18 }, { day: '后天', icon: '☀️', high: 28, low: 20 }, { day: '周五', icon: '☀️', high: 30, low: 21 }, { day: '周六', icon: '⛅', high: 29, low: 20 }],
+      tips: '今日空气质量较差，建议减少外出。出门请佩戴口罩，做好防护。',
+      suggestion: '尽量待在室内，避免户外活动。可以在室内做一些简单的健身运动。'
+    },
+    '杭州': {
+      current: { icon: '☀️', temp: 32, condition: '晴', humidity: 55, wind: '西南风3级', uv: '强', airQuality: '优' },
+      forecast: [{ day: '今天', icon: '☀️', high: 34, low: 24 }, { day: '明天', icon: '☀️', high: 35, low: 25 }, { day: '后天', icon: '⛅', high: 33, low: 24 }, { day: '周五', icon: '🌧️', high: 29, low: 23 }, { day: '周六', icon: '☁️', high: 30, low: 24 }],
+      tips: '今日紫外线很强，外出请做好防晒措施。气温较高，注意防暑降温。',
+      suggestion: '避免中午11点到下午3点外出。可以选择早晨或傍晚出门散步。'
+    }
+  }
+  
+  const data = cityWeatherData[city] || cityWeatherData['北京']
+  weatherData.value = { ...weatherData.value, city, ...data }
+  showCitySearch.value = false
+}
+
+const cityList = ['北京', '上海', '广州', '深圳', '成都', '杭州']
 
 onMounted(() => {
   store.loadSignInRecords()
