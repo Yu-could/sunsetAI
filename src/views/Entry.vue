@@ -1,4 +1,4 @@
-﻿﻿<template>
+﻿﻿﻿﻿﻿﻿﻿﻿<template>
   <div class="min-h-screen bg-bg flex items-center justify-center p-4">
     <div class="entry-container w-full max-w-sm bg-card rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] p-6 relative overflow-hidden">
       <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-parent to-child"></div>
@@ -11,7 +11,7 @@
 
       <div class="device-badge text-center mb-4">
         <span :class="['inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium', isMobile ? 'bg-child-bg text-child' : 'bg-parent-bg text-parent']">
-          <AppIcon :name="isMobile ? 'mobile' : 'globe'" size="sm" />
+          <AppIcon :name="isMobile ? 'mobile' : 'monitor'" size="sm" />
           {{ isMobile ? '移动端' : '桌面端' }}
         </span>
       </div>

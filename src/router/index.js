@@ -114,22 +114,22 @@ const routes = [
   {
     path: '/desktop/health',
     name: 'DesktopHealth',
-    component: () => import('../views/Health.vue')
+    component: () => import('../views/desktop/Health.vue')
   },
   {
     path: '/desktop/medicine',
     name: 'DesktopMedicine',
-    component: () => import('../views/Medicine.vue')
+    component: () => import('../views/desktop/Medicine.vue')
   },
   {
     path: '/desktop/schedule',
     name: 'DesktopSchedule',
-    component: () => import('../views/Schedule.vue')
+    component: () => import('../views/desktop/Schedule.vue')
   },
   {
     path: '/desktop/sos',
     name: 'DesktopSOS',
-    component: () => import('../views/SOS.vue')
+    component: () => import('../views/desktop/SOS.vue')
   },
   {
     path: '/desktop/child',

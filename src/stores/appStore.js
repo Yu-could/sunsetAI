@@ -22,7 +22,8 @@ export const useAppStore = defineStore('app', {
     scheduleRecords: [],
     userProfile: {},
     appSettings: {},
-    realNameInfo: {}
+    realNameInfo: {},
+    dialectRequests: []
   }),
   actions: {
     generateInviteCode() {
@@ -286,6 +287,41 @@ export const useAppStore = defineStore('app', {
       }
       localStorage.setItem('sunsetai_user_profile', JSON.stringify(this.userProfile))
     },
+    addDialectRequest(request) {
+      this.dialectRequests.push({
+        ...request,
+        id: Date.now(),
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      })
+      localStorage.setItem('sunsetai_dialect_requests', JSON.stringify(this.dialectRequests))
+    },
+    loadDialectRequests() {
+      const data = localStorage.getItem('sunsetai_dialect_requests')
+      if (data) {
+        this.dialectRequests = JSON.parse(data)
+      }
+    },
+    approveDialectRequest(id) {
+      const request = this.dialectRequests.find(r => r.id === id)
+      if (request) {
+        request.status = 'approved'
+        request.approvedAt = new Date().toISOString()
+        localStorage.setItem('sunsetai_dialect_requests', JSON.stringify(this.dialectRequests))
+      }
+    },
+    rejectDialectRequest(id) {
+      const request = this.dialectRequests.find(r => r.id === id)
+      if (request) {
+        request.status = 'rejected'
+        request.rejectedAt = new Date().toISOString()
+        localStorage.setItem('sunsetai_dialect_requests', JSON.stringify(this.dialectRequests))
+      }
+    },
+    deleteDialectRequest(id) {
+      this.dialectRequests = this.dialectRequests.filter(r => r.id !== id)
+      localStorage.setItem('sunsetai_dialect_requests', JSON.stringify(this.dialectRequests))
+    },
     clearAllData() {
       localStorage.removeItem('sunsetai_invite_code')
       localStorage.removeItem('sunsetai_connected_parents')
@@ -304,6 +340,7 @@ export const useAppStore = defineStore('app', {
       localStorage.removeItem('sunsetai_user_profile')
       localStorage.removeItem('sunsetai_app_settings')
       localStorage.removeItem('sunsetai_realname_info')
+      localStorage.removeItem('sunsetai_dialect_requests')
       this.inviteCode = ''
       this.connectedParents = []
       this.healthRecords = []
@@ -324,6 +361,7 @@ export const useAppStore = defineStore('app', {
       this.scheduleRecords = []
       this.userProfile = {}
       this.appSettings = {}
+      this.dialectRequests = []
     }
   }
 })

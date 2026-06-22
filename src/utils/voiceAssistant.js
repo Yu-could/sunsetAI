@@ -24,21 +24,36 @@ export class VoiceAssistant {
 
       this.recognition.onstart = () => {
         this.isListening = true
+        console.log('[语音识别] 🎤 开始监听，语言设置:', this.currentLang)
         this.notifyCallbacks('start')
       }
 
       this.recognition.onresult = (event) => {
         const text = event.results[0][0].transcript
+        const confidence = event.results[0][0].confidence || 1
+        console.log('[语音识别] 📝 识别结果:', { text, confidence, isFinal: event.results[0].isFinal })
         this.notifyCallbacks('result', text)
       }
 
       this.recognition.onerror = (event) => {
         this.isListening = false
+        console.error('[语音识别] ❌ 识别错误:', { error: event.error, message: event.message })
+        const errorMessages = {
+          'not-allowed': '用户拒绝了麦克风权限',
+          'no-speech': '未检测到语音输入',
+          'aborted': '识别被中止',
+          'audio-capture': '无法访问麦克风',
+          'network': '网络错误',
+          'not-supported': '浏览器不支持语音识别',
+          'service-not-allowed': '语音服务被阻止'
+        }
+        console.error('[语音识别] ❌ 错误说明:', errorMessages[event.error] || '未知错误')
         this.notifyCallbacks('error', event.error)
       }
 
       this.recognition.onend = () => {
         this.isListening = false
+        console.log('[语音识别] 🔇 监听结束')
         this.notifyCallbacks('end')
       }
     }
@@ -161,25 +176,39 @@ export const dialectPronunciationMap = {
 export function fuzzyMatch(text, commands) {
   const normalizedText = text.toLowerCase().replace(/\s+/g, '')
   
+  console.log('[语音识别] 开始识别，原始文本:', text)
+  console.log('[语音识别] 归一化后:', normalizedText)
+  console.log('[语音识别] 当前语言:', voiceAssistant.currentLang)
+  console.log('[语音识别] 可用命令:', Object.keys(commands))
+
   for (const [command, route] of Object.entries(commands)) {
     if (normalizedText.includes(command.toLowerCase())) {
+      console.log('[语音识别] ✅ 精确匹配成功:', { command, route, confidence: 1.0 })
       return { matched: true, command, route, confidence: 1.0 }
     }
   }
 
+  console.log('[语音识别] ⚠️ 精确匹配失败，尝试方言同义词匹配')
   const synonyms = dialectSynonyms
   for (const [baseCommand, syns] of Object.entries(synonyms)) {
+    console.log(`[语音识别]   检查命令 "${baseCommand}" 的同义词:`, syns)
     for (const syn of syns) {
       if (normalizedText.includes(syn.toLowerCase())) {
         const route = commands[baseCommand] || commands[syn]
         if (route) {
+          console.log('[语音识别] ✅ 同义词匹配成功:', { baseCommand, synonym: syn, route, confidence: 0.8 })
           return { matched: true, command: baseCommand, route, confidence: 0.8 }
+        } else {
+          console.log('[语音识别] ⚠️ 同义词匹配到但未找到路由:', { baseCommand, synonym: syn })
         }
       }
     }
   }
 
+  console.log('[语音识别] ⚠️ 同义词匹配失败，尝试模糊字符匹配')
   const charMatchThreshold = 0.6
+  let bestMatch = { matched: false, command: null, route: null, confidence: 0 }
+  
   for (const [command, route] of Object.entries(commands)) {
     const commandChars = command.split('')
     let matchedChars = 0
@@ -194,12 +223,66 @@ export function fuzzyMatch(text, commands) {
     }
     
     const matchRatio = matchedChars / commandChars.length
-    if (matchRatio >= charMatchThreshold) {
-      return { matched: true, command, route, confidence: matchRatio }
+    console.log(`[语音识别]   命令 "${command}" 字符匹配率: ${(matchRatio * 100).toFixed(0)}% (${matchedChars}/${commandChars.length})`)
+    
+    if (matchRatio >= charMatchThreshold && matchRatio > bestMatch.confidence) {
+      bestMatch = { matched: true, command, route, confidence: matchRatio }
     }
   }
 
-  return { matched: false, command: null, route: null, confidence: 0 }
+  if (bestMatch.matched) {
+    console.log('[语音识别] ✅ 模糊字符匹配成功:', bestMatch)
+    return bestMatch
+  }
+
+  console.log('[语音识别] ❌ 所有匹配方式均失败，识别结果:', text)
+  
+  const recommendations = generateRecommendations(normalizedText, commands)
+  if (recommendations.length > 0) {
+    console.log('[语音识别] 💡 推荐普通话命令:', recommendations)
+  }
+  
+  return { 
+    matched: false, 
+    command: null, 
+    route: null, 
+    confidence: 0,
+    recommendations: recommendations
+  }
+}
+
+function generateRecommendations(text, commands) {
+  const baseCommands = ['健康', '用药', '回忆', '饮食', '签到', '家人', '日程', '求助']
+  const recommendations = []
+  
+  for (const baseCommand of baseCommands) {
+    const route = commands[baseCommand]
+    if (!route) continue
+    
+    let similarity = 0
+    const baseChars = baseCommand.split('')
+    
+    for (const char of baseChars) {
+      if (text.includes(char)) {
+        similarity += 1
+      }
+    }
+    
+    const similarityRatio = similarity / baseChars.length
+    
+    if (similarityRatio > 0.3) {
+      recommendations.push({
+        command: baseCommand,
+        route: route,
+        similarity: similarityRatio,
+        suggestion: `您是不是想说"${baseCommand}"？`
+      })
+    }
+  }
+  
+  recommendations.sort((a, b) => b.similarity - a.similarity)
+  
+  return recommendations.slice(0, 3)
 }
 
 export function getVoiceCommands() {

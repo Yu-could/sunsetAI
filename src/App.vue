@@ -6,7 +6,7 @@
       <router-view />
     </div>
     <div v-else>
-      <nav v-if="!isEntry" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-lg z-50 md:top-0 md:bottom-auto border-t border-gray-100">
+      <nav v-if="!isEntry && !isAdmin" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm shadow-lg z-50 md:top-0 md:bottom-auto border-t border-gray-100">
         <div class="max-w-md mx-auto md:max-w-none">
           <ul class="flex justify-around items-center h-16 md:h-14">
             <li v-for="item in currentNavItems" :key="item.path">
@@ -21,8 +21,6 @@
       <main :class="isEntry ? '' : 'pb-20 md:pb-0 md:pt-16'">
         <router-view />
       </main>
-      <!-- 全局SOS悬浮按钮 - 仅在父母端非入口页面显示 -->
-      <FabSOS v-if="isParentRoute && !isEntry" />
     </div>
   </div>
 </template>
@@ -33,7 +31,6 @@ import { useRoute } from 'vue-router'
 import { HomeIcon, HeartIcon, DeviceTabletIcon, ExclamationTriangleIcon, CogIcon, ChatBubbleLeftIcon, LinkIcon, UsersIcon } from '@heroicons/vue/24/solid'
 import { useAppStore } from './stores/appStore'
 import Toast from './components/Toast.vue'
-import FabSOS from './components/FabSOS.vue'
 import Onboarding from './components/Onboarding.vue'
 
 const route = useRoute()
@@ -58,6 +55,10 @@ const isDesktop = computed(() => {
 
 const isEntry = computed(() => {
   return route.path === '/' || route.path.startsWith('/login') || route.path.startsWith('/realname')
+})
+
+const isAdmin = computed(() => {
+  return route.path.startsWith('/admin')
 })
 
 const isParentRoute = computed(() => {
