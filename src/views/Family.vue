@@ -1,4 +1,4 @@
-﻿﻿﻿﻿<template>
+﻿﻿﻿﻿﻿﻿<template>
   <div class="px-4 py-6 max-w-md mx-auto">
     <header class="mb-6">
       <h1 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">

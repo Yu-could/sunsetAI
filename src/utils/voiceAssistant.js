@@ -6,10 +6,12 @@ export class VoiceAssistant {
     this.callbacks = []
     this.currentLang = 'zh-CN'
     this.langOptions = [
-      { code: 'zh-CN', name: '普通话', desc: '标准中文' },
-      { code: 'zh-HK', name: '粤语', desc: '广东话' },
-      { code: 'zh-TW', name: '台语', desc: '台湾方言' },
-      { code: 'zh-YUE', name: '粤语(广)', desc: '广州话' }
+      { code: 'zh-CN', name: '普通话', desc: '标准中文', supported: true },
+      { code: 'zh-HK', name: '粤语', desc: '广东话', supported: true },
+      { code: 'zh-TW', name: '台语', desc: '台湾方言', supported: true },
+      { code: 'zh-SC', name: '四川话', desc: '西南官话', supported: false },
+      { code: 'zh-NE', name: '东北话', desc: '东北方言', supported: false },
+      { code: 'zh-SH', name: '上海话', desc: '吴语', supported: false }
     ]
     this.initRecognition()
   }
@@ -45,10 +47,20 @@ export class VoiceAssistant {
           'audio-capture': '无法访问麦克风',
           'network': '网络错误',
           'not-supported': '浏览器不支持语音识别',
-          'service-not-allowed': '语音服务被阻止'
+          'service-not-allowed': '语音服务被阻止',
+          'language-not-supported': '当前语言不被支持'
         }
-        console.error('[语音识别] ❌ 错误说明:', errorMessages[event.error] || '未知错误')
-        this.notifyCallbacks('error', event.error)
+        const errorMsg = errorMessages[event.error] || '未知错误'
+        console.error('[语音识别] ❌ 错误说明:', errorMsg)
+        
+        if (event.error === 'language-not-supported') {
+          this.notifyCallbacks('dialect-not-supported', { 
+            lang: this.currentLang, 
+            message: `当前浏览器暂不支持"${this.getLangName(this.currentLang)}"方言，请尝试使用普通话` 
+          })
+        } else {
+          this.notifyCallbacks('error', { code: event.error, message: errorMsg })
+        }
       }
 
       this.recognition.onend = () => {
@@ -72,6 +84,16 @@ export class VoiceAssistant {
 
   getLangOptions() {
     return this.langOptions
+  }
+
+  getLangName(langCode) {
+    const lang = this.langOptions.find(l => l.code === langCode)
+    return lang ? lang.name : langCode
+  }
+
+  isLangSupported(langCode) {
+    const lang = this.langOptions.find(l => l.code === langCode)
+    return lang ? lang.supported : false
   }
 
   addCallback(callback) {

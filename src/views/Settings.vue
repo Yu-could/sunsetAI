@@ -49,17 +49,38 @@
       <div class="space-y-4">
         <div>
           <label class="block text-gray-600 text-sm mb-2">语言/方言</label>
+          <div class="relative mb-3">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+            <input 
+              v-model="searchQuery" 
+              type="text" 
+              placeholder="搜索方言..." 
+              class="w-full pl-9 pr-4 py-2 bg-gray-100 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+          </div>
           <div class="grid grid-cols-2 gap-2">
             <button 
-              v-for="lang in langOptions" 
+              v-for="lang in filteredLangOptions" 
               :key="lang.code" 
-              @click="settings.language = lang.code" 
-              :class="settings.language === lang.code ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600'" 
+              @click="selectLanguage(lang)" 
+              :class="[
+                settings.language === lang.code ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-600',
+                !lang.supported ? 'opacity-70 relative' : ''
+              ]" 
               class="py-2.5 rounded-lg text-sm font-medium transition-colors text-left px-3"
             >
-              <div>{{ lang.name }}</div>
+              <div class="flex items-center justify-between">
+                <span>{{ lang.name }}</span>
+                <span v-if="!lang.supported" class="text-xs opacity-60">⚠️</span>
+              </div>
               <div class="text-xs opacity-70">{{ lang.desc }}</div>
             </button>
+          </div>
+          <div v-if="filteredLangOptions.length === 0" class="text-center py-4 text-gray-400 text-sm">
+            未找到匹配的方言
+          </div>
+          <div v-if="langWarning" class="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+            <p class="text-sm text-amber-700">{{ langWarning }}</p>
           </div>
         </div>
         
@@ -134,6 +155,8 @@ const store = useAppStore()
 
 const isTestingVoice = ref(false)
 const testResult = ref('')
+const langWarning = ref('')
+const searchQuery = ref('')
 
 const fontSizes = [
   { label: '小', value: 'small' },
@@ -144,6 +167,17 @@ const fontSizes = [
 
 const langOptions = voiceAssistant.getLangOptions()
 
+const filteredLangOptions = computed(() => {
+  if (!searchQuery.value) {
+    return langOptions
+  }
+  const query = searchQuery.value.toLowerCase()
+  return langOptions.filter(lang => 
+    lang.name.toLowerCase().includes(query) || 
+    lang.desc.toLowerCase().includes(query)
+  )
+})
+
 const settings = ref({
   fontSize: 'medium',
   volume: 80,
@@ -153,6 +187,18 @@ const settings = ref({
 
 const username = computed(() => store.userProfile?.username || store.loginStatus?.username || '用户')
 const isVerified = computed(() => !!store.userProfile?.idCard)
+
+const selectLanguage = (lang) => {
+  settings.value.language = lang.code
+  
+  if (!lang.supported) {
+    langWarning.value = `💡 当前浏览器暂不支持"${lang.name}"方言的语音识别，系统会尝试使用普通话进行识别。建议使用普通话以获得最佳效果。`
+  } else {
+    langWarning.value = ''
+  }
+  
+  voiceAssistant.setLang(lang.code)
+}
 
 const saveSettings = () => {
   store.saveAppSettings(settings.value)
@@ -239,9 +285,15 @@ const handleVoiceTestEvent = (event, data) => {
       isTestingVoice.value = false
       if (data === 'browser-not-supported') {
         testResult.value = '您的浏览器不支持语音识别'
+      } else if (typeof data === 'object') {
+        testResult.value = '语音识别出错：' + data.message
       } else {
         testResult.value = '语音识别出错：' + data
       }
+      break
+    case 'dialect-not-supported':
+      isTestingVoice.value = false
+      testResult.value = data.message
       break
     case 'end':
       if (isTestingVoice.value) {

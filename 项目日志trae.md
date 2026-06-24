@@ -837,6 +837,86 @@ const scrollToRecipes = () => {
 
 ---
 
+## 2026年6月22日
+
+### 24. SOS 悬浮按钮优化
+
+**目标**：移除容易误触的 SOS 悬浮按钮，保留页面内紧急求助模块
+
+**问题背景**：
+- 移动端 SOS 悬浮按钮容易误触
+- 用户反馈拖动功能在移动端不生效
+
+**解决方案**：
+- 移除全局 SOS 悬浮按钮（[src/App.vue](file:///C:/Users/26293/Desktop/创意大赛/src/App.vue)）
+- 移除桌面端首页 SOS 悬浮按钮（[src/views/desktop/Home.vue](file:///C:/Users/26293/Desktop/创意大赛/src/views/desktop/Home.vue)）
+- 保留页面内的紧急求助模块，用户可通过点击进入
+
+**更新文件**：
+- [src/App.vue](file:///C:/Users/26293/Desktop/创意大赛/src/App.vue) - 移除全局 FabSOS 组件
+- [src/views/desktop/Home.vue](file:///C:/Users/26293/Desktop/创意大赛/src/views/desktop/Home.vue) - 移除页面内 FabSOS 组件
+
+### 25. IconPark 图标接入与替换
+
+**目标**：接入 IconPark 图标库，替换原有图标组件
+
+**实现方案**：
+- 创建 [src/components/IconIcon.vue](file:///C:/Users/26293/Desktop/创意大赛/src/components/IconIcon.vue) 组件
+- 使用内嵌 SVG 图标（IconPark 风格），无需外部依赖
+- 包含 80+ 常用图标（导航、健康、日历、天气、媒体等）
+- 支持 `fill="currentColor"`，兼容 Tailwind 颜色类
+
+**图标分类**：
+- 天气图标：sun、moon、cloud、cloudy、rain、snowflake、foggy、sunrise、sunset、thermometer、umbrella、wind
+- 常用图标：heart、home、calendar、user、phone、message、setting、check-circle、close-circle、bell、warning、search、plus、minus、play、pause、stop、mic、hospital、food、water、walk
+- 设备图标：monitor、mobile（显示器/手机）
+
+**更新文件**：
+- [src/components/AppIcon.vue](file:///C:/Users/26293/Desktop/创意大赛/src/components/AppIcon.vue) - 更新为内嵌 SVG 图标
+- [src/views/Entry.vue](file:///C:/Users/26293/Desktop/创意大赛/src/views/Entry.vue) - 更新设备图标（显示器/手机）
+
+### 26. 桌面端页面路由修复
+
+**目标**：修复桌面端点击主页模块后跳转到手机端页面的问题
+
+**问题背景**：
+- 桌面端路由配置错误地指向了手机端组件
+- 点击健康、用药、日程、紧急求助等模块进入手机端页面
+
+**解决方案**：
+- 创建4个桌面端页面组件：
+  - [src/views/desktop/Health.vue](file:///C:/Users/26293/Desktop/创意大赛/src/views/desktop/Health.vue) - 健康监测
+  - [src/views/desktop/Medicine.vue](file:///C:/Users/26293/Desktop/创意大赛/src/views/desktop/Medicine.vue) - 用药提醒
+  - [src/views/desktop/Schedule.vue](file:///C:/Users/26293/Desktop/创意大赛/src/views/desktop/Schedule.vue) - 日程管理
+  - [src/views/desktop/SOS.vue](file:///C:/Users/26293/Desktop/创意大赛/src/views/desktop/SOS.vue) - 紧急求助
+- 更新路由配置指向正确的桌面端组件
+
+**更新文件**：
+- [src/router/index.js](file:///C:/Users/26293/Desktop/创意大赛/src/router/index.js) - 更新桌面端路由配置
+
+### 27. 今日用药模拟数据清空
+
+**目标**：清空首页模拟用药数据，显示"今日暂无用药计划"
+
+**清空内容**：
+- 移动端首页 [src/views/Home.vue](file:///C:/Users/26293/Desktop/创意大赛/src/views/Home.vue) - 清空 todayMedicines 模拟数据
+- 桌面端首页 [src/views/desktop/Home.vue](file:///C:/Users/26293/Desktop/创意大赛/src/views/desktop/Home.vue) - 清空 todayMedicines 模拟数据
+- 桌面端用药页面 [src/views/desktop/Medicine.vue](file:///C:/Users/26293/Desktop/创意大赛/src/views/desktop/Medicine.vue) - 清空 medicines 模拟数据
+
+### 28. 日志文件合并
+
+**目标**：将修改文档内容合并到项目日志
+
+**合并内容**：
+- 将 `修改文档claude code.md` 和 `修改文档.md` 的内容合并到项目日志
+- 添加"🤖 Claude Code 完成的优化"标记
+- 删除原文档文件
+
+**更新文件**：
+- [项目日志trae.md](file:///C:/Users/26293/Desktop/创意大赛/项目日志trae.md) - 合并所有日志内容
+
+---
+
 ## 📊 项目状态
 
 ### 完成项 ✅
@@ -877,6 +957,11 @@ const scrollToRecipes = () => {
 | 识别失败推荐命令 | ✅ 完成 | 6月21日 |
 | 管理员后台隐藏导航 | ✅ 完成 | 6月21日 |
 | 图标组件替换为内嵌SVG | ✅ 完成 | 6月21日 |
+| SOS悬浮按钮移除 | ✅ 完成 | 6月22日 |
+| IconPark图标接入 | ✅ 完成 | 6月22日 |
+| 桌面端页面路由修复 | ✅ 完成 | 6月22日 |
+| 今日用药模拟数据清空 | ✅ 完成 | 6月22日 |
+| 日志文件合并 | ✅ 完成 | 6月22日 |
 
 ### 访问链接
 

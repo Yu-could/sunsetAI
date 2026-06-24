@@ -1,4 +1,4 @@
-﻿﻿﻿﻿import os
+﻿﻿﻿﻿﻿﻿import os
 icon_path = os.path.abspath("logo.ico").replace("\\", "/")
 desktop = os.path.join(os.environ["USERPROFILE"], "Desktop")
 shortcut_path = os.path.join(desktop, "夕阳智语 - SunsetAI.lnk")
